@@ -54,6 +54,9 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
                 string? inputPath = inputUrlOrPath;
 
+                // need to check before downloading file.
+                bool applyCSharpScriptFilter = isCSharpScriptMode && IsCSharpScriptFile(inputPath);
+
                 if (inputUrl != null)
                 {
                     // full path of local file may be parsed as url, ignore it.
@@ -99,7 +102,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 }
 
                 // apply only when input file is .cs file.
-                if (isCSharpScriptMode && IsCSharpScriptFile(inputPath))
+                if (applyCSharpScriptFilter)
                 {
                     await Task.Run(async () =>
                     {
