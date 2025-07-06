@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Project Path="SatorImaging.DotnetTool.StaticImport/SatorImaging.DotnetTool.StaticImport.csproj" />
+</Solution>
