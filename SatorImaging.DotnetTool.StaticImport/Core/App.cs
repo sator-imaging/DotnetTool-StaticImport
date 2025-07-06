@@ -102,7 +102,6 @@ public class App
     static RootCommand GetRootCommand()
     {
         var cmd = new RootCommand("""
-            dotnet static-import
             Migrate file(s) from another project, github or public website
             """);
 

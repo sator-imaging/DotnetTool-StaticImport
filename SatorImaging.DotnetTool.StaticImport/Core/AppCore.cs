@@ -64,11 +64,15 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
                 if (inputUrl != null)
                 {
-                    inputPath = await TryDownloadFileAsync(inputUrl, ct);
-
-                    if (inputPath == null)
+                    // full path of local file may be parsed as url, ignore it.
+                    if (inputUrl.Scheme != SR.FileScheme)
                     {
-                        return SR.Result.ErrorUncategorized;
+                        inputPath = await TryDownloadFileAsync(inputUrl, ct);
+
+                        if (inputPath == null)
+                        {
+                            return SR.Result.ErrorUncategorized;
+                        }
                     }
                 }
 

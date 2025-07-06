@@ -22,6 +22,8 @@ internal static class SR
     public const string GitHubTokenVariableName = "GITHUB_TOKEN";
     public const string EXT_CS = ".cs";
 
+    public const string FileScheme = "file";
+
     public const string HttpsScheme = "https";
     public const string HttpsSchemeFull = HttpsScheme + "://";
 
