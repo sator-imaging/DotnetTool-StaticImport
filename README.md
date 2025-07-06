@@ -49,7 +49,14 @@ github:<USER_NAME>@<REPO_NAME>/<REF>/path/to/file.ext
 - REF: branch name, tag or commit hash
 
 
-If the environment variable `GITHUB_TOKEN` is defined, it is used for accesss to GitHub. (set by default in GitHub Actions)
+If the environment variable `GITHUB_TOKEN` is defined, it is used for accesss to GitHub.
+
+Here shows how to setup the variable in `.yml` file.
+
+```yaml
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
 
 
 
