@@ -34,5 +34,5 @@ jobs:
 
     - name: Tests
       run: |
-        static-import ${{ inputs.args }}
+        touch Editor.meta
         static-import ${{ inputs.args }}
