@@ -97,6 +97,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
 #endif
 
+// same symbol must be removed from combinations.
 #if Z_MULTI_USE
 #endif
 #if Z_MULTI_USE
