@@ -152,7 +152,7 @@ internal class ConditionalDirectiveTree
         // --> treat element index as bit position to build all possible combinations.
         static void impl(Node tipNode, List<List<string>> result)
         {
-            var symbolList = new List<string>(SR.DefaultListCapacity);
+            var symbolList = new List<string>(SR.DefaultListCapacity * 2);
             {
                 var node = tipNode;
                 do
@@ -183,7 +183,7 @@ internal class ConditionalDirectiveTree
 
             for (int i = 1; i < comboCount; i++)  // exclude 0
             {
-                var list = new List<string>(SR.DefaultListCapacity);
+                var list = new List<string>(symbolsSpan.Length);
 
                 for (int bitPosition = 0; bitPosition < symbolsSpan.Length; bitPosition++)
                 {
