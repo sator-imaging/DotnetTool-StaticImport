@@ -19,7 +19,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             GitHubUrlBuilder();
 
             var key = Console.ReadKey("ReadKey timeout test (1,000ms): ", 1000);
-            Console.WriteLine($"Key: '{key.Key}'  KeyChar: '{key.KeyChar}'  Modifiers: '{key.Modifiers}'");
+            Console.WriteLine($"Modifiers: '{key.Modifiers}'  Key: '{key.Key}'  KeyChar: '{key.KeyChar}'");
         }
 
 
