@@ -50,9 +50,10 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         [Conditional("DEBUG")] public static void WriteDebugOnlyLine(object message) => WriteLine(message);
 
 
-        // for GitHub actions, it must be finished without user interaction.
+        // for GitHub actions.
         public static bool CanReadKey => !CONSOLE.IsInputRedirected;
 
+        // must be finished without user interaction.
         public static ConsoleKeyInfo ReadKey(string message, int timeoutMilliseconds = 10_000, ConsoleKeyInfo timeoutKey = default)
         {
             // ensure key is not available.
