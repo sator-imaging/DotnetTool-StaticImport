@@ -18,6 +18,9 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             ParseDirectiveTree();
             GitHubUrlBuilder();
 
+            if (!Console.CanReadKey)
+                throw new Exception("cannot read key");
+
             var key = Console.ReadKey("ReadKey timeout test (1,000ms): ", 1000);
             Console.WriteLine($"Modifiers: '{key.Modifiers}'  Key: '{key.Key}'  KeyChar: '{key.KeyChar}'");
         }

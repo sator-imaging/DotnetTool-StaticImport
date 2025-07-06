@@ -92,6 +92,12 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
                     if (!forceOverwrite)
                     {
+                        if (!Console.CanReadKey)
+                        {
+                            Console.WriteWarning("cannot read standard input. set force overwrite option to copy file.");
+                            continue;
+                        }
+
                         var choice = Console.ReadKey($"File exists ({outputPath})  overwrite? [y/N]: ");
                         if (choice.Key != ConsoleKey.Y)
                         {

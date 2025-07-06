@@ -51,6 +51,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
 
         // for GitHub actions, it must be finished without user interaction.
+        public static bool CanReadKey => !CONSOLE.IsInputRedirected;
+
         public static ConsoleKeyInfo ReadKey(string message, int timeoutMilliseconds = 10_000, ConsoleKeyInfo timeoutKey = default)
         {
             // ensure key is not available.
