@@ -22,6 +22,17 @@ public class App
                 EnablePosixBundling = true,
             });
 
+            // hehe: force run tests!
+#if DEBUG
+            if (options.GetValue(opt_TEST))
+            {
+                App_Tests.ParseDirectiveTree();
+                App_Tests.GitHubUrlBuilder();
+
+                return SR.Result.Succeeded;
+            }
+#endif
+
             result = await options.InvokeAsync();
 
             if (result == 0)  // may be non-zero...!!
@@ -127,17 +138,6 @@ public class App
 
     static ValueTask<int> RunAsync(ParseResult options, CancellationToken ct = default)
     {
-#if DEBUG
-        //hehe
-        if (options.GetValue(opt_TEST))
-        {
-            App_Tests.ParseDirectiveTree();
-            App_Tests.GitHubUrlBuilder();
-
-            return new(SR.Result.Succeeded);
-        }
-#endif
-
         GitHubFileProvider.Instance.Initialize();
 
         var inputFilePaths = options.GetRequiredValue(opt_inputFilePaths);
@@ -163,7 +163,7 @@ public class App
             // value is 0 if flag is omitted.
             if (timeout != 0)
             {
-                Console.VerboseWarning($"invalid timeout is ignored: {timeout}");
+                Console.WriteVerboseWarning($"invalid timeout is ignored: {timeout}");
             }
         }
         else
