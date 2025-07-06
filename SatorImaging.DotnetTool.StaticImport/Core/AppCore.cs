@@ -52,14 +52,6 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                     outputPath = Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
                 }
 
-                if (isCSharpScriptMode)
-                {
-                    if (!ValidateCSharpFilePaths(inputUrlOrPath, outputPath))
-                    {
-                        return SR.Result.ErrorUncategorized;
-                    }
-                }
-
                 string? inputPath = inputUrlOrPath;
 
                 if (inputUrl != null)
@@ -106,7 +98,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                     }
                 }
 
-                if (isCSharpScriptMode)
+                // apply only when input file is .cs file.
+                if (isCSharpScriptMode && IsCSharpScriptFile(inputPath))
                 {
                     await Task.Run(async () =>
                     {
@@ -135,21 +128,9 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         }
 
 
-        static bool ValidateCSharpFilePaths(string inputFilePath, string outputFilePath)
+        static bool IsCSharpScriptFile(string filePath)
         {
-            if (!inputFilePath.EndsWith(SR.EXT_CS, StringComparison.OrdinalIgnoreCase))
-            {
-                Console.WriteError($"Input file is not {SR.EXT_CS} file: {inputFilePath}");
-                return false;
-            }
-
-            if (!outputFilePath.EndsWith(SR.EXT_CS, StringComparison.OrdinalIgnoreCase))
-            {
-                Console.WriteError($"Output path is not {SR.EXT_CS} file: {outputFilePath}");
-                return false;
-            }
-
-            return true;
+            return filePath.EndsWith(SR.EXT_CS, StringComparison.OrdinalIgnoreCase);
         }
 
 
