@@ -1,0 +1,32 @@
+<Project>
+
+  <PropertyGroup Label="NuGetSettings">
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>static-import</ToolCommandName>
+    <!--
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    -->
+
+    <NuGetPackageID>SatorImaging.DotnetTool.StaticImport</NuGetPackageID>
+    <NuGetPackageTitle>Static Import Tool</NuGetPackageTitle>
+    <NuGetPackageProduct>$(NuGetPackageTitle)</NuGetPackageProduct>
+    <NuGetPackageOwner>Sator Imaging</NuGetPackageOwner>
+    <NuGetPackageCompany>$(NuGetPackageOwner)</NuGetPackageCompany>
+    <NuGetPackageCopyright>(c) 2025 $(NuGetPackageOwner)</NuGetPackageCopyright>
+
+    <NuGetPackageDescription>
+      `static-import` is a dotnet cli tool to migrate file(s) from another project, github or public website.
+    </NuGetPackageDescription>
+    <NuGetPackageTags>dotnet, tool, static, import, static-import, migrate, C#, github</NuGetPackageTags>
+    <NuGetPackageWebsite>https://x.com/sator_imaging</NuGetPackageWebsite>
+    <NuGetPackageRepository>https://github.com/sator-imaging/DotnetTool-StaticImport</NuGetPackageRepository>
+    <NuGetPackageReleaseNote>https://github.com/sator-imaging/DotnetTool-StaticImport</NuGetPackageReleaseNote>
+    <NuGetPackageLicenseUrl>https://github.com/sator-imaging/DotnetTool-StaticImport/blob/main/LICENSE.md</NuGetPackageLicenseUrl>
+    <NuGetPackageLicenseSPDX>MIT</NuGetPackageLicenseSPDX>
+    <NuGetPackageIconUrl>https://github.com/sator-imaging/DotnetTool-StaticImport/raw/main/assets/icon-128px.png</NuGetPackageIconUrl>
+
+    <NuGetPackageVersion>1.0.0</NuGetPackageVersion>
+    <NuGetPackageVersionSuffix>-beta.1</NuGetPackageVersionSuffix>
+  </PropertyGroup>
+
+</Project>
