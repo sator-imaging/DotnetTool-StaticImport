@@ -1,9 +1,6 @@
 // Licensed under the MIT License
 // https://github.com/sator-imaging/DotnetTool-StaticImport
 
-using System;
-using System.Diagnostics;
-
 namespace SatorImaging.DotnetTool.StaticImport.Core;
 
 /// <summary>
@@ -34,6 +31,4 @@ internal static class SR
     public const string GitHubSchemeFull = GitHubScheme + ":";
     public const string GitHubHostName = "https://github.com";
     public const string GitHubApiHostName = "https://api.github.com";
-
-    public static readonly double TimestampToTicks = ((double)TimeSpan.TicksPerSecond / Stopwatch.Frequency);
 }

@@ -70,7 +70,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             {
                 Thread.Sleep(250);
 
-                var elapsed = TimeSpan.FromTicks((long)((Stopwatch.GetTimestamp() - startAt) * SR.TimestampToTicks));
+                var elapsed = Stopwatch.GetElapsedTime(startAt);
                 if (elapsed.TotalMilliseconds > timeoutMilliseconds)
                 {
                     WriteWarning("timed out");
