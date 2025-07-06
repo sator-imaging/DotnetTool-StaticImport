@@ -13,6 +13,16 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
     // hehe
     internal static class App_Tests
     {
+        public static void RunAllTests()
+        {
+            ParseDirectiveTree();
+            GitHubUrlBuilder();
+
+            var key = Console.ReadKey("ReadKey timeout test (1,000ms): ", 1000);
+            Console.WriteLine($"Key: '{key.Key}'  KeyChar: '{key.KeyChar}'  Modifiers: '{key.Modifiers}'");
+        }
+
+
         public static void ParseDirectiveTree()
         {
             impl();
@@ -75,7 +85,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 }
                 catch (Exception error)
                 {
-                    Console.WriteVerboseLine($"Expected exception: {error.Message}");
+                    Console.WriteLine($"Expected exception: {error.Message}");
                     continue;
                 }
 

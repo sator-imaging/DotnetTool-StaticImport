@@ -26,9 +26,7 @@ public class App
 #if DEBUG
             if (options.GetValue(opt_TEST))
             {
-                App_Tests.ParseDirectiveTree();
-                App_Tests.GitHubUrlBuilder();
-
+                App_Tests.RunAllTests();
                 return SR.Result.Succeeded;
             }
 #endif
@@ -163,7 +161,7 @@ public class App
             // value is 0 if flag is omitted.
             if (timeout != 0)
             {
-                Console.WriteVerboseWarning($"invalid timeout is ignored: {timeout}");
+                Console.WriteWarning($"invalid timeout is ignored: {timeout}");
             }
         }
         else
