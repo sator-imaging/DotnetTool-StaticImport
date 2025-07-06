@@ -1,0 +1,30 @@
+on:
+  workflow_dispatch:
+    inputs:
+      args:
+        type: string
+        default: "--internal --namespace \"New\" --input-files \"alpha\" \"bravo\""
+        required: true
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '9.0.x' ]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET ${{ matrix.dotnet-version }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+
+    - name: Install
+      run: |
+        dotnet tool install SatorImaging.DotnetTool.StaticImport -g --prerelease
+
+    - name: Tests
+      run: |
+        static-import ${{ inputs.args }}
