@@ -25,6 +25,10 @@ jobs:
       run: |
         dotnet tool install SatorImaging.DotnetTool.StaticImport -g --prerelease
 
+    - name: Env
+      run: |
+        env
+
     - name: Tests
       run: |
         static-import ${{ inputs.args }}
