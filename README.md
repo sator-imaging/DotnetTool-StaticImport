@@ -1,5 +1,5 @@
+[🇯🇵 日本語]()  
 [![](https://img.shields.io/nuget/v/SatorImaging.DotnetTool.StaticImport)](https://www.nuget.org/packages/SatorImaging.DotnetTool.StaticImport/)  
-[🇯🇵 日本語]()
 
 
 `static-import` is a dotnet cli tool to migrate file(s) from another project, github or public website.
