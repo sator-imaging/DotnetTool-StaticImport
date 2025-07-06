@@ -45,7 +45,7 @@ jobs:
         # required to enable deterministic build --> -p:ContinuousIntegrationBuild=true
         # it seems that hash is calculated based on the whole git directory contents
         # ex: including github actions yaml files
-        dotnet build -c Release --no-restore  -p:ContinuousIntegrationBuild=true
+        dotnet pack -c Release --no-restore  -p:ContinuousIntegrationBuild=true
 
     - name: NuGet push
       run: |
