@@ -9,6 +9,9 @@ on:
   #pull_request:
   #  branches: [ "main" ]
 
+  release:
+    types: [published]
+
   workflow_dispatch:
   #  inputs:
   #    run_build:
@@ -49,9 +52,8 @@ jobs:
 
     - name: NuGet push
       run: |
+        #ls -R
         #cd src
-
-        ls -R
 
         dotnet nuget push "${{ env.push_source  }}"  \
           -k ${{ secrets.NUGET_API_KEY }}  \
