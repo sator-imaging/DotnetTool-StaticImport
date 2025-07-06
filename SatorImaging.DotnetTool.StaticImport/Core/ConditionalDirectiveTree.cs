@@ -88,7 +88,7 @@ internal class ConditionalDirectiveTree
 
                 if (node.Symbols.Count == 0)
                 {
-                    Console.WriteVerboseWarning($"symbol not found: " + directiveStx);
+                    Console.WriteWarning($"symbol not found: " + directiveStx);
                 }
 
                 parent.Children.Add(node);

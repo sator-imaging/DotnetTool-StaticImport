@@ -39,7 +39,7 @@ internal class TypeMigrator
             var tree = CSharpSyntaxTree.ParseText(csharpSourceCode, options);
             var root = tree.GetCompilationUnitRoot();
 
-            Console.WriteVerboseLine($"# {(symbols.Count == 0 ? "No Symbol" : "Symbols: " + string.Join(", ", symbols))}");
+            Console.WriteLine($"# {(symbols.Count == 0 ? "No Symbol" : "Symbols: " + string.Join(", ", symbols))}");
             csharpSourceCode = rewrite(root, namespaceRewriter, visibilityRewriter);
         }
 
@@ -57,7 +57,7 @@ internal class TypeMigrator
                 var changes = namespaceRewriter.ChangeLog;
                 if (changes.Count > 0)
                 {
-                    Console.WriteVerboseLine($"## {nameof(NamespaceRewriter)}: {changes.Count} change(s){PREFIX}{string.Join(PREFIX, changes)}");
+                    Console.WriteLine($"## {nameof(NamespaceRewriter)}: {changes.Count} change(s){PREFIX}{string.Join(PREFIX, changes)}");
                     changes.Clear();
                 }
             }
@@ -69,7 +69,7 @@ internal class TypeMigrator
                 var changes = visibilityRewriter.ChangeLog;
                 if (changes.Count > 0)
                 {
-                    Console.WriteVerboseLine($"## {nameof(TypeModifierRewriter)}: {changes.Count} change(s){PREFIX}{string.Join(PREFIX, changes)}");
+                    Console.WriteLine($"## {nameof(TypeModifierRewriter)}: {changes.Count} change(s){PREFIX}{string.Join(PREFIX, changes)}");
                     changes.Clear();
                 }
             }

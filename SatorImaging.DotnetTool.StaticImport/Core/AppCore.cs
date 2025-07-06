@@ -110,7 +110,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 {
                     await Task.Run(async () =>
                     {
-                        Console.WriteVerboseLine();  // spacer for non-silent mode
+                        Console.WriteLine();  // spacer for non-silent mode
 
                         var sourceCode = await File.ReadAllTextAsync(inputPath, ct);
                         var outputFileContent = typeMigrator.Migrate(sourceCode, newNamespace, makeTypeInternal);
@@ -128,7 +128,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                     Console.WriteImportantLine($"File copied: {outputPath}");
                 }
 
-                Console.WriteVerboseLine();  // spacer for non-silent mode
+                Console.WriteLine();  // spacer for non-silent mode
             }
 
             return SR.Result.Succeeded;
@@ -196,7 +196,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             }
             else
             {
-                Console.WriteVerboseWarning($"Cannot retrieve last modified date: {url}");
+                Console.WriteWarning($"Cannot retrieve last modified date: {url}");
             }
 
 
