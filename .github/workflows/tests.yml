@@ -1,4 +1,4 @@
-name: test-runner
+name: test runner
 
 on:
   workflow_dispatch:
@@ -34,4 +34,5 @@ jobs:
 
     - name: Tests
       run: |
+        static-import ${{ inputs.args }}
         static-import ${{ inputs.args }}
