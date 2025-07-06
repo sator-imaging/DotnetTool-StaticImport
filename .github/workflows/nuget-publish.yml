@@ -51,6 +51,8 @@ jobs:
       run: |
         #cd src
 
+        ls -R
+
         dotnet nuget push "${{ env.push_source  }}"  \
           -k ${{ secrets.NUGET_API_KEY }}  \
           -s https://api.nuget.org/v3/index.json \
