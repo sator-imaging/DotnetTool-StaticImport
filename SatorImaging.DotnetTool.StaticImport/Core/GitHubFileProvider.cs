@@ -152,19 +152,6 @@ internal class GitHubFileProvider  // TODO : IFileProvider
 
         var lastModified = GET.Content.Headers.LastModified;
 
-#if DEBUG
-        if (GitHubToken != null)
-        {
-            foreach (var header in GET.Headers.Concat(GET.Content.Headers))
-            {
-                if (header.Key.StartsWith("X-Rate", StringComparison.Ordinal))
-                {
-                    Console.WriteDebugOnlyLine($"{header.Key}: {string.Join(", ", header.Value)}");
-                }
-            }
-        }
-#endif
-
         var content = await GET.Content.ReadAsByteArrayAsync(ct);
         return (content, lastModified);
     }
