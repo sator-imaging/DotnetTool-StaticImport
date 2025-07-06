@@ -39,7 +39,7 @@ internal class TypeMigrator
             var tree = CSharpSyntaxTree.ParseText(csharpSourceCode, options);
             var root = tree.GetCompilationUnitRoot();
 
-            Console.WriteVerboseLine($"# {(symbols.Count == 0 ? "No Preprocessor Symbol" : string.Join(", ", symbols))}");
+            Console.WriteVerboseLine($"# {(symbols.Count == 0 ? "No Symbol" : "Symbols: " + string.Join(", ", symbols))}");
             csharpSourceCode = rewrite(root, namespaceRewriter, visibilityRewriter);
         }
 

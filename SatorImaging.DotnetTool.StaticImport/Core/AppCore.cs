@@ -110,14 +110,16 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 {
                     await Task.Run(async () =>
                     {
+                        Console.WriteVerboseLine();  // spacer for non-silent mode
+
                         var sourceCode = await File.ReadAllTextAsync(inputPath, ct);
                         var outputFileContent = typeMigrator.Migrate(sourceCode, newNamespace, makeTypeInternal);
 
                         await File.WriteAllTextAsync(outputPath, outputFileContent, Encoding.UTF8, ct);
+
+                        Console.WriteImportantLine($"File written: {outputPath}");
                     },
                     ct);
-
-                    Console.WriteImportantLine($"File written: {outputPath}");
                 }
                 else
                 {
