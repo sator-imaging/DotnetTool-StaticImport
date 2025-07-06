@@ -20,7 +20,7 @@ internal class ConditionalDirectiveTree
         public Node? Parent;
         public List<Node> Children = new(SR.DefaultListCapacity);
 
-        public List<string> Symbols = [];
+        public List<string> Symbols = new(SR.DefaultListCapacity);
 
         public override string ToString()
         {
@@ -73,7 +73,7 @@ internal class ConditionalDirectiveTree
 
                 var parent = (parentStack.Count > 0) ? parentStack.Peek() : rootNode;
 
-                Console.DebugOnlyLog($"{(directiveStx.IsKind(SyntaxKind.IfDirectiveTrivia) ? "IF:" : "ELIF:"),-7}{directiveStx} (parent:{parent})");
+                Console.WriteDebugOnlyLine($"{(directiveStx.IsKind(SyntaxKind.IfDirectiveTrivia) ? "IF:" : "ELIF:"),-7}{directiveStx} (parent:{parent})");
 
                 var node = new Node()
                 {
@@ -88,7 +88,7 @@ internal class ConditionalDirectiveTree
 
                 if (node.Symbols.Count == 0)
                 {
-                    Console.VerboseWarning($"symbol not found: " + directiveStx);
+                    Console.WriteVerboseWarning($"symbol not found: " + directiveStx);
                 }
 
                 parent.Children.Add(node);
@@ -100,7 +100,7 @@ internal class ConditionalDirectiveTree
             }
             else if (directiveStx.IsKind(SyntaxKind.EndIfDirectiveTrivia))
             {
-                Console.DebugOnlyLog("ENDIF: " + directiveStx.ToString());
+                Console.WriteDebugOnlyLine("ENDIF: " + directiveStx.ToString());
 
                 if (!parentStack.TryPop(out _))
                 {
@@ -140,7 +140,7 @@ internal class ConditionalDirectiveTree
 
         Debug.Assert(result.First().Count == 0);
         Debug.Assert(result.Skip(1).All(x => x.Count != 0));
-        Debug.Assert(result.Count == result.Distinct(new UnorderedListElementComparer<string>()).Count());
+        Debug.Assert(result.Count == result.Distinct(new UnorderedListStringComparer()).Count());
 
         return result;
 
@@ -184,7 +184,6 @@ internal class ConditionalDirectiveTree
             for (int i = 1; i < comboCount; i++)  // exclude 0
             {
                 var list = new List<string>(SR.DefaultListCapacity);
-                result.Add(list);
 
                 for (int bitPosition = 0; bitPosition < symbolsSpan.Length; bitPosition++)
                 {
@@ -193,16 +192,21 @@ internal class ConditionalDirectiveTree
                         list.Add(symbolsSpan[bitPosition]);
                     }
                 }
+
+                if (!result.Contains(list, new UnorderedListStringComparer()))
+                {
+                    result.Add(list);
+                }
             }
         }
     }
 
 
-    readonly struct UnorderedListElementComparer<T> : IEqualityComparer<List<T>> where T : IEquatable<T>
+    readonly struct UnorderedListStringComparer : IEqualityComparer<List<string>>
     {
-        public int GetHashCode([DisallowNull] List<T> obj) => obj.GetHashCode();
+        public int GetHashCode([DisallowNull] List<string> obj) => obj.Sum(x => x.Length);
 
-        public bool Equals(List<T>? left, List<T>? right)
+        public bool Equals(List<string>? left, List<string>? right)
         {
             if (left == null || right == null)
             {
