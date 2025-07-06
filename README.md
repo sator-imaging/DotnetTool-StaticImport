@@ -16,9 +16,7 @@
 dotnet tool install SatorImaging.DotnetTool.StaticImport -g --prerelease
 ```
 
-<sup>
-&nbsp; * <code>--prerelease</code> is required at this moment.
-</sup>
+&nbsp; * `--prerelease` is required at this moment.
 
 
 
