@@ -34,5 +34,5 @@ jobs:
 
     - name: Tests
       run: |
-        touch Editor.meta
+        touch -d "1970/01/01 00:00" Editor.meta
         static-import ${{ inputs.args }}
