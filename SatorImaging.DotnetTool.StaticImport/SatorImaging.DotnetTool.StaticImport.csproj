@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>SatorImaging.DotnetTool.StaticImport</RootNamespace>
+    <ImplicitUsings>false</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <Title>$(NuGetPackageTitle)</Title>
+    <Version>$(NuGetPackageVersion)$(NuGetPackageVersionSuffix)</Version>
+    <PackageId>$(NuGetPackageID)</PackageId>
+    <Authors>$(NuGetPackageOwner)</Authors>
+    <Company>$(NuGetPackageCompany)</Company>
+    <Product>$(NuGetPackageProduct)</Product>
+    <Description>$(NuGetPackageDescription)</Description>
+    <Copyright>$(NuGetPackageCopyright)</Copyright>
+    <PackageProjectUrl>$(NuGetPackageWebsite)</PackageProjectUrl>
+    <RepositoryUrl>$(NuGetPackageRepository)</RepositoryUrl>
+    <PackageTags>$(NuGetPackageTags)</PackageTags>
+    <PackageReleaseNotes>$(NuGetPackageReleaseNote)</PackageReleaseNotes>
+    <AssemblyVersion>$(NuGetPackageVersion)</AssemblyVersion>
+    <FileVersion>$(NuGetPackageVersion)$(NuGetPackageVersionSuffix)</FileVersion>
+
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <!-- don't create LANG dir in bin/ folder -->
+  <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' != 'true'">
+    <SatelliteResourceLanguages>en;en-US</SatelliteResourceLanguages>
+    <AvailableCultures>en</AvailableCultures>
+    <SupportedCultures>en</SupportedCultures>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageReference Include="SatorImaging.StaticMemberAnalyzer" Version="2.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta5.25306.1" />
+  </ItemGroup>
+
+</Project>
