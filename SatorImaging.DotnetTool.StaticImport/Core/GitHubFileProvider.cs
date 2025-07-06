@@ -104,7 +104,12 @@ internal class GitHubFileProvider  // TODO : IFileProvider
                    ?? Environment.GetEnvironmentVariable(SR.GitHubTokenVariableName, EnvironmentVariableTarget.Machine)
                    ;
 
-        GitHubToken = string.IsNullOrWhiteSpace(ghToken) ? null : new("Bearer", ghToken);
+        if (!string.IsNullOrWhiteSpace(ghToken))
+        {
+            GitHubToken = new("Bearer", ghToken);
+
+            Console.WriteImportantLine($"'{SR.GitHubTokenVariableName}' was loaded");
+        }
     }
 
 
