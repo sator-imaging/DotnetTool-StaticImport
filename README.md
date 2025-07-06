@@ -25,7 +25,7 @@ dotnet tool install SatorImaging.DotnetTool.StaticImport -g --prerelease
 Copy files to current folder with `Import_` prefix:
 
 ```sh
-dotnet static-import -- -o "." -op "Import_" --timeout 3000 -i \
+static-import -o "." -op "Import_" --timeout 3000 -i \
     "local-file.cs" \
     "github:user@repo/BRANCH_TAG_OR_COMMIT/path/to/file.cs" \
     "https://inter.net/path/to/file.cs"
