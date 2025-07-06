@@ -125,6 +125,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
                     Console.WriteImportantLine($"File copied: {outputPath}");
                 }
+
+                Console.WriteVerboseLine();  // spacer for non-silent mode
             }
 
             return SR.Result.Succeeded;
@@ -192,7 +194,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             }
             else
             {
-                Console.VerboseWarning($"Cannot retrieve last modified date: {url}");
+                Console.WriteVerboseWarning($"Cannot retrieve last modified date: {url}");
             }
 
 

@@ -60,10 +60,10 @@ internal class GitHubFileProvider  // TODO : IFileProvider
             throw new ArgumentException("file path is invalid: " + filePath);
         }
 
-        Console.DebugOnlyLog($"GitHub User: {userName}");
-        Console.DebugOnlyLog($"GitHub Repo: {repoName}");
-        Console.DebugOnlyLog($"Github Refs: {REF}");
-        Console.DebugOnlyLog($"Github Path: {filePath}");
+        Console.WriteDebugOnlyLine($"GitHub User: {userName}");
+        Console.WriteDebugOnlyLine($"GitHub Repo: {repoName}");
+        Console.WriteDebugOnlyLine($"Github Refs: {REF}");
+        Console.WriteDebugOnlyLine($"Github Path: {filePath}");
 
         return (userName, repoName, REF, filePath);
     }
@@ -73,7 +73,7 @@ internal class GitHubFileProvider  // TODO : IFileProvider
     {
         var url = new Uri($"{SR.GitHubHostName}/{userName}/{repoName}/raw/{REF}/{filePath}");
 
-        Console.DebugOnlyLog($"GitHub Content URL: {url}");
+        Console.WriteDebugOnlyLine($"GitHub Content URL: {url}");
         return url;
     }
 
@@ -81,7 +81,7 @@ internal class GitHubFileProvider  // TODO : IFileProvider
     {
         var url = new Uri($"{SR.GitHubApiHostName}/repos/{userName}/{repoName}/commits?sha={REF}&path=/{filePath}");
 
-        Console.DebugOnlyLog($"GitHub Commits API: {url}");
+        Console.WriteDebugOnlyLine($"GitHub Commits API: {url}");
         return url;
     }
 
@@ -154,7 +154,7 @@ internal class GitHubFileProvider  // TODO : IFileProvider
             {
                 if (header.Key.StartsWith("X-Rate", StringComparison.Ordinal))
                 {
-                    Console.DebugOnlyLog($"{header.Key}: {string.Join(", ", header.Value)}");
+                    Console.WriteDebugOnlyLine($"{header.Key}: {string.Join(", ", header.Value)}");
                 }
             }
         }

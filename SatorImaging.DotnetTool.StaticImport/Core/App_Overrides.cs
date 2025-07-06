@@ -38,7 +38,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
         public static bool IsSilentMode { get; set; }
 
-        public static void VerboseLog(object? message = null)
+        public static void WriteVerboseLine(object? message = null)
         {
             if (IsSilentMode)
                 return;
@@ -46,7 +46,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             CONSOLE.WriteLine(message);
         }
 
-        public static void VerboseWarning(object message)
+        public static void WriteVerboseWarning(object message)
         {
             if (IsSilentMode)
                 return;
@@ -57,7 +57,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         }
 
 
-        [Conditional("DEBUG")] public static void DebugOnlyLog(object message) => VerboseLog(message);
+        [Conditional("DEBUG")] public static void WriteDebugOnlyLine(object message) => WriteVerboseLine(message);
     }
 
     internal static class HttpClient

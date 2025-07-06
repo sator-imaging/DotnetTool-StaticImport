@@ -30,7 +30,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
                     static void write(ConditionalDirectiveTree.Node node, int level)
                     {
-                        Console.DebugOnlyLog($"{level}: {new string(' ', level * 2)}{node}");
+                        Console.WriteDebugOnlyLine($"{level}: {new string(' ', level * 2)}{node}");
 
                         foreach (var child in node.Children)
                         {
@@ -43,10 +43,10 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
                 foreach (var combo in combinations.Select(x => x.OrderByDescending(y => y.Length)).OrderBy(x => x.FirstOrDefault()))
                 {
-                    Console.DebugOnlyLog(string.Join(", ", combo));
+                    Console.WriteDebugOnlyLine(string.Join(", ", combo));
                 }
 
-                Console.DebugOnlyLog($"Total combination count: {combinations.Count}");
+                Console.WriteDebugOnlyLine($"Total combination count: {combinations.Count}");
             }
         }
 
@@ -75,7 +75,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 }
                 catch (Exception error)
                 {
-                    Console.VerboseLog($"Expected exception: {error.Message}");
+                    Console.WriteVerboseLine($"Expected exception: {error.Message}");
                     continue;
                 }
 
@@ -95,6 +95,15 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 //#elif false
 //#endif
 
+#endif
+
+#if Z_MULTI_USE
+#endif
+#if Z_MULTI_USE
+#elif Z_MULTI_USE
+#elif Z_MULTI_USE
+#endif
+#if Z_MULTI_USE
 #endif
 
 #if DEBUG == true && NET == true
