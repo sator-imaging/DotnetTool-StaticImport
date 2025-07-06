@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Net.Http.Headers;
+using System.Threading;
 using CONSOLE = System.Console;
 using HTTP_CLIENT = System.Net.Http.HttpClient;
 
@@ -13,16 +14,6 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 {
     internal static class Console
     {
-        public static ConsoleKeyInfo ReadKey(string message)
-        {
-            CONSOLE.Write($"{message.TrimEnd()} ");
-
-            var result = CONSOLE.ReadKey();
-            CONSOLE.WriteLine();
-
-            return result;
-        }
-
         public static void WriteImportantLine(object message)
         {
             CONSOLE.WriteLine(message);
@@ -38,7 +29,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
         public static bool IsSilentMode { get; set; }
 
-        public static void WriteVerboseLine(object? message = null)
+        public static void WriteLine(object? message = null)
         {
             if (IsSilentMode)
                 return;
@@ -46,7 +37,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             CONSOLE.WriteLine(message);
         }
 
-        public static void WriteVerboseWarning(object message)
+        public static void WriteWarning(object message)
         {
             if (IsSilentMode)
                 return;
@@ -56,8 +47,39 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             CONSOLE.ResetColor();
         }
 
+        [Conditional("DEBUG")] public static void WriteDebugOnlyLine(object message) => WriteLine(message);
 
-        [Conditional("DEBUG")] public static void WriteDebugOnlyLine(object message) => WriteVerboseLine(message);
+
+        // for GitHub actions, it must be finished without user interaction.
+        public static ConsoleKeyInfo ReadKey(string message, int timeoutMilliseconds = 10_000, ConsoleKeyInfo timeoutKey = default)
+        {
+            // ensure key is not available.
+            while (CONSOLE.KeyAvailable)
+            {
+                _ = CONSOLE.ReadKey();
+            }
+
+            CONSOLE.Write($"{message.TrimEnd()} ");
+
+            var startAt = Stopwatch.GetTimestamp();
+
+            while (!CONSOLE.KeyAvailable)
+            {
+                Thread.Sleep(250);
+
+                var elapsed = TimeSpan.FromTicks((long)((Stopwatch.GetTimestamp() - startAt) * SR.TimestampToTicks));
+                if (elapsed.TotalMilliseconds > timeoutMilliseconds)
+                {
+                    WriteWarning("timed out");
+                    return timeoutKey;
+                }
+            }
+
+            var result = CONSOLE.ReadKey();
+            CONSOLE.WriteLine();
+
+            return result;
+        }
     }
 
     internal static class HttpClient
