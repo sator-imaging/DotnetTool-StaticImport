@@ -12,6 +12,8 @@
 
 # Installation
 
+On the command line, enter the following command to install package as a command.
+
 ```sh
 dotnet tool install SatorImaging.DotnetTool.StaticImport -g --prerelease
 ```
