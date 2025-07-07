@@ -13,51 +13,58 @@ namespace SatorImaging.DotnetTool.StaticImport.Core;
 
 internal class GitHubFileProvider  // TODO : IFileProvider
 {
-    internal static (string? userName, string? repoName, string? REF, string? filePath) ParseUrl(string input)
+    internal static (string userName, string repoName, string REF, string filePath) ParseUrl(ReadOnlySpan<char> input)
     {
-        int pos_pathStart = input.IndexOf('/');
-        if (pos_pathStart < 0 || !input.StartsWith(SR.GitHubSchemeFull, StringComparison.Ordinal))
+        static ArgumentException error(string message, ReadOnlySpan<char> input) => new(message + input.ToString());
+
+        if (!input.StartsWith(SR.GitHubSchemeFull, StringComparison.Ordinal))
         {
-            throw new ArgumentException("invalid git url: " + input);
+            throw error("invalid git url: ", input);
         }
 
         input = input[SR.GitHubSchemeFull.Length..];
-        pos_pathStart -= SR.GitHubSchemeFull.Length;
+
+        int pos_pathStart = input.IndexOf('/');
+        if (pos_pathStart < 0)
+        {
+            throw error("file path is not found: ", input);
+        }
 
         var userAndRepo = input[..pos_pathStart];
 
         int pos_atMark = userAndRepo.IndexOf('@');
         if (pos_atMark < 0)
         {
-            throw new ArgumentException("user or repo name is invalid: " + userAndRepo);
+            throw error("user and repo name is not found: ", input);
         }
 
-        var userName = userAndRepo[..pos_atMark];
-        var repoName = userAndRepo[(pos_atMark + 1)..pos_pathStart];
+        string userName = userAndRepo[..pos_atMark].ToString();
+        string repoName = userAndRepo[(pos_atMark + 1)..pos_pathStart].ToString();
 
         if (string.IsNullOrWhiteSpace(userName) ||
             string.IsNullOrWhiteSpace(repoName))
         {
-            throw new ArgumentException("user or repo name is empty: " + userAndRepo);
+            throw error("user or repo name is empty: ", input);
         }
 
-        var filePath = input[(pos_pathStart + 1)..];
-        if (string.IsNullOrWhiteSpace(filePath))
-        {
-            throw new ArgumentException("file path is invalid: " + filePath);
-        }
+        string filePath = input[(pos_pathStart + 1)..].ToString();
 
         int pos_REF = filePath.IndexOf('/');
         if (pos_REF < 0)
         {
-            throw new ArgumentException("no branch, tag or commit hash: " + filePath);
+            throw error("no branch, tag or commit hash: ", input);
         }
 
-        var REF = filePath[..pos_REF];
+        string REF = filePath[..pos_REF];
+        if (string.IsNullOrWhiteSpace(REF))
+        {
+            throw error("branch, tag or commit hash is empty: ", input);
+        }
+
         filePath = filePath[(pos_REF + 1)..];
         if (string.IsNullOrWhiteSpace(filePath))
         {
-            throw new ArgumentException("file path is invalid: " + filePath);
+            throw error("file path is empty: ", input);
         }
 
         Console.WriteDebugOnlyLine($"GitHub User: {userName}");
@@ -120,10 +127,6 @@ internal class GitHubFileProvider  // TODO : IFileProvider
     public async ValueTask<(byte[]? content, DateTimeOffset? lastModified)> TryGetAsync(string url, CancellationToken ct = default)
     {
         var (userName, repoName, REF, filePath) = ParseUrl(url);
-        if (userName == null || repoName == null || REF == null || filePath == null)
-        {
-            return (null, null);
-        }
 
         var modDateTask = DownloadAsync(HttpMethod.Head, BuildApiUrl(userName, repoName, REF, filePath).ToString(), ct);
         var contentTask = DownloadAsync(HttpMethod.Get, BuildContentUrl(userName, repoName, REF, filePath).ToString(), ct);

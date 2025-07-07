@@ -76,15 +76,15 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 "github:u@/",
                 "github:@r",
                 "github:@r/",
+                "github:u@r",
                 "github:u@r/",
-                "github:u@r/d",
-                "github:u@r/d/",
-                //"github:u@r/d/file.ext",
+                "github:u@r/b",
+                "github:u@r/b/",
             })
             {
                 try
                 {
-                    _ = Core.GitHubFileProvider.ParseUrl(url);
+                    _ = GitHubFileProvider.ParseUrl(url);
                 }
                 catch (Exception error)
                 {
@@ -94,6 +94,11 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
                 throw new Exception($"Expected exception has not thrown: {url}");
             }
+
+            var correctGitHubUrl = "github:u@r/b/f";
+            _ = GitHubFileProvider.ParseUrl(correctGitHubUrl);
+
+            Console.WriteLine($"Successfully parsed: {correctGitHubUrl}");
         }
     }
 }
@@ -115,9 +120,9 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 #endif
 #if Z_MULTI_USE
 #elif Z_MULTI_USE
-#elif Z_MULTI_USE
-#endif
 #if Z_MULTI_USE
+#endif
+#elif Z_MULTI_USE
 #endif
 
 #if DEBUG == true && NET == true
