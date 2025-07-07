@@ -157,7 +157,7 @@ internal class ConditionalDirectiveTree
                 var node = tipNode;
                 do
                 {
-                    symbolList.AddRange(node.Symbols);
+                    symbolList.AddRange(node.Symbols.Except(symbolList));
                     node = node.Parent;
                 }
                 while (node != null);
@@ -176,7 +176,8 @@ internal class ConditionalDirectiveTree
                 throw new IndexOutOfRangeException($"max preprocessor symbol count is '{MAX_ITEMS}'");
             }
 
-            var symbolsSpan = CollectionsMarshal.AsSpan(symbolList.Distinct().OrderBy(x => x).ToList());
+            var symbolsSpan = CollectionsMarshal.AsSpan(symbolList);
+            var unorderedComparer = new UnorderedListStringComparer();
 
             int comboCount = (int)Math.Pow(2, symbolsSpan.Length);
             result.Capacity += comboCount;
@@ -193,7 +194,7 @@ internal class ConditionalDirectiveTree
                     }
                 }
 
-                if (!result.Contains(list, new UnorderedListStringComparer()))
+                if (!result.Contains(list, unorderedComparer))
                 {
                     result.Add(list);
                 }
