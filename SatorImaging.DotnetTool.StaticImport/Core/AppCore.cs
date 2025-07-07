@@ -81,20 +81,17 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 var outputInfo = new FileInfo(outputPath);
                 if (outputInfo.Exists)
                 {
-                    if (inputInfo.Exists)
+                    if (!forceOverwrite)
                     {
                         if (inputInfo.LastWriteTimeUtc <= outputInfo.LastWriteTimeUtc)
                         {
-                            Console.WriteImportantLine($"No change: {outputPath}");
+                            Console.WriteImportantLine($"Output file is up to date: {outputPath}");
                             continue;
                         }
-                    }
 
-                    if (!forceOverwrite)
-                    {
                         if (!Console.CanReadKey)
                         {
-                            Console.WriteError($"cannot read user key input. set force overwrite option to copy file: {outputPath}");
+                            Console.WriteError($"Failed to read key input. Set force overwrite option to copy file: {outputPath}");
                             return SR.Result.ErrorUncategorized;
                         }
 

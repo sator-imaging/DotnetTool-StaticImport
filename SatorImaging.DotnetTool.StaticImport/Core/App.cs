@@ -75,7 +75,10 @@ public class App
 
     static readonly Option<bool> opt_forceOverwrite = new("-f", "--force-overwrite")
     {
-        Description = "Overwrite file without confirmation",
+        Description = """
+            Overwrite file without confirmation
+            Note that output file will be overwritten even if it is newer than input file
+            """,
     };
 
     static readonly Option<string> opt_namespace = new("--namespace")
