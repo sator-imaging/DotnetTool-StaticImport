@@ -25,6 +25,7 @@ internal static class SR
     public const string EXT_CS = ".cs";
 
     public const string FileScheme = "file";
+    public const string FileSchemeFull = FileScheme + ":";
 
     public const string HttpsScheme = "https";
     public const string HttpsSchemeFull = HttpsScheme + "://";

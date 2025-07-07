@@ -154,6 +154,13 @@ public class App
                 Console.WriteError($"Empty input file path or url is found");
                 return new(SR.Result.ErrorUncategorized);
             }
+
+            // won't support file url scheme
+            if (input.StartsWith(SR.FileSchemeFull, StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteError($"Url scheme '{SR.FileSchemeFull}' won't be supported: {input}");
+                return new(SR.Result.ErrorUncategorized);
+            }
         }
 
         Console.IsSilentMode = options.GetValue(opt_silent);
