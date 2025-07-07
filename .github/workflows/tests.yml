@@ -19,6 +19,9 @@ jobs:
         dotnet-version: [ '9.0.x' ]
 
     steps:
+    #- name: Checkout
+    #  uses: actions/checkout@v4
+
     - name: Setup .NET ${{ matrix.dotnet-version }}
       uses: actions/setup-dotnet@v4
       with:
@@ -34,5 +37,7 @@ jobs:
 
     - name: Tests
       run: |
-        touch -d "1970/01/01 00:00" Editor.meta
+        ## overwrite behaviour test (expect error)
+        #touch -d "1970/01/01 00:00" Editor.meta
+        
         static-import ${{ inputs.args }}
