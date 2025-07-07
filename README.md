@@ -1,7 +1,7 @@
 [![img.shields.io](https://img.shields.io/nuget/v/SatorImaging.DotnetTool.StaticImport)](https://www.nuget.org/packages/SatorImaging.DotnetTool.StaticImport/)
 [![nuget-publish.yml](https://github.com/sator-imaging/DotnetTool-StaticImport/actions/workflows/nuget-publish.yml/badge.svg)](https://github.com/sator-imaging/DotnetTool-StaticImport/actions/workflows/nuget-publish.yml)
 &nbsp;
-<sup>[🇯🇵 日本語]()</sup>
+<sup>[🇯🇵 日本語](https://zenn.dev/sator_imaging/articles/7b1df223d17d89)</sup>
 
 
 `static-import` is a dotnet cli tool to migrate file(s) from another project, github or public website.
