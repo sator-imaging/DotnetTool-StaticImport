@@ -19,6 +19,13 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             CONSOLE.WriteLine(message);
         }
 
+        public static void WriteWarning(object message)
+        {
+            CONSOLE.ForegroundColor = ConsoleColor.Yellow;
+            CONSOLE.WriteLine(message);
+            CONSOLE.ResetColor();
+        }
+
         public static void WriteError(object message)
         {
             CONSOLE.ForegroundColor = ConsoleColor.Red;
@@ -35,16 +42,6 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 return;
 
             CONSOLE.WriteLine(message);
-        }
-
-        public static void WriteWarning(object message)
-        {
-            if (IsSilentMode)
-                return;
-
-            CONSOLE.ForegroundColor = ConsoleColor.Yellow;
-            CONSOLE.WriteLine(message);
-            CONSOLE.ResetColor();
         }
 
         [Conditional("DEBUG")] public static void WriteDebugOnlyLine(object message) => WriteLine(message);
