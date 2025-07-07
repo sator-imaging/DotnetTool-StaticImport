@@ -43,4 +43,6 @@ jobs:
         touch -d "1970/01/01 00:00" past.txt
         touch -d "2345/01/01 00:00" future.txt
 
+        printf "args: ${{ inputs.args }}"
+
         static-import ${{ inputs.args }}
