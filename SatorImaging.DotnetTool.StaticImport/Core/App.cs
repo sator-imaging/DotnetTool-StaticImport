@@ -31,12 +31,7 @@ public class App
             }
 #endif
 
-            result = await options.InvokeAsync();
-
-            if (result == 0)  // may be non-zero...!!
-            {
-                result = await RunAsync(options);
-            }
+            return await options.InvokeAsync();
         }
         catch (Exception error)
         {
@@ -119,6 +114,7 @@ public class App
 
         int i = 0;
 
+        // need to insert to reorder...!!
 #if DEBUG
         cmd.Options.Insert(i++, opt_TEST);
 #endif
@@ -130,6 +126,8 @@ public class App
         cmd.Options.Insert(i++, opt_internal);
         cmd.Options.Insert(i++, opt_timeout);
         cmd.Options.Insert(i++, opt_silent);
+
+        cmd.SetAction((options, ct) => RunAsync(options, ct).AsTask());
 
         return cmd;
     }
