@@ -26,7 +26,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         }
 
 
-        public static void ParseDirectiveTree()
+        static void ParseDirectiveTree()
         {
             impl();
 
@@ -63,7 +63,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             }
         }
 
-        public static void GitHubUrlBuilder()
+        static void GitHubUrlBuilder()
         {
             foreach (var url in new string[]{
                 "git",
