@@ -53,7 +53,7 @@ public class App
     {
         Description = $"""
             Input file paths or urls ({SR.HttpsSchemeFull}... or {SR.GitHubSchemeFull}user@repo/<REF>/path/to/file.ext)
-            If environment variable `{SR.GitHubTokenVariableName}` is defined, it is used for access to GitHub
+            If environment variable `{SR.GitHubTokenVarName1st}` or `{SR.GitHubTokenVarName2nd}` is defined, it is used to access to GitHub
             """,
         Required = true,
 

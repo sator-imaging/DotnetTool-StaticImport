@@ -2,6 +2,7 @@
 // https://github.com/sator-imaging/DotnetTool-StaticImport
 
 using System;
+using System.Collections.Immutable;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
@@ -98,16 +99,20 @@ internal class GitHubFileProvider  // TODO : IFileProvider
 
     public void Initialize()
     {
-        var ghToken = Environment.GetEnvironmentVariable(SR.GitHubTokenVariableName, EnvironmentVariableTarget.Process)
-                   ?? Environment.GetEnvironmentVariable(SR.GitHubTokenVariableName, EnvironmentVariableTarget.User)
-                   ?? Environment.GetEnvironmentVariable(SR.GitHubTokenVariableName, EnvironmentVariableTarget.Machine)
-                   ;
-
-        if (!string.IsNullOrWhiteSpace(ghToken))
+        foreach (var varName in ImmutableArray.Create(SR.GitHubTokenVarName1st, SR.GitHubTokenVarName2nd))
         {
-            GitHubToken = new("Bearer", ghToken);
+            var token = Environment.GetEnvironmentVariable(varName, EnvironmentVariableTarget.Process)
+                     ?? Environment.GetEnvironmentVariable(varName, EnvironmentVariableTarget.User)
+                     ?? Environment.GetEnvironmentVariable(varName, EnvironmentVariableTarget.Machine)
+                     ;
 
-            Console.WriteImportantLine($"'{SR.GitHubTokenVariableName}' was loaded");
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                GitHubToken = new("Bearer", token);
+
+                Console.WriteImportantLine($"'{varName}' was loaded");
+                break;
+            }
         }
     }
 

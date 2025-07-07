@@ -19,7 +19,9 @@ internal static class SR
     public const string UserAgentName = $"{nameof(SatorImaging)}.{nameof(DotnetTool)}.{nameof(StaticImport)}";
     public const string UserAgentVersion = "1.0.0";
 
-    public const string GitHubTokenVariableName = "GITHUB_TOKEN";
+    // https://cli.github.com/manual/gh_help_environment
+    public const string GitHubTokenVarName1st = "GH_TOKEN";
+    public const string GitHubTokenVarName2nd = "GITHUB_TOKEN";
     public const string EXT_CS = ".cs";
 
     public const string FileScheme = "file";
