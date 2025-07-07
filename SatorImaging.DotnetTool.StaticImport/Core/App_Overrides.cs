@@ -53,6 +53,11 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         // must be finished without user interaction.
         public static ConsoleKeyInfo ReadKey(string message, int timeoutMilliseconds = 10_000, ConsoleKeyInfo timeoutKey = default)
         {
+            if (!CanReadKey)
+            {
+                throw new NotSupportedException($"try use {nameof(CanReadKey)} to check feature availability");
+            }
+
             // ensure key is not available.
             while (CONSOLE.KeyAvailable)
             {
