@@ -94,8 +94,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                     {
                         if (!Console.CanReadKey)
                         {
-                            Console.WriteWarning($"cannot read user key input. set force overwrite option to copy file: {outputPath}");
-                            continue;
+                            Console.WriteError($"cannot read user key input. set force overwrite option to copy file: {outputPath}");
+                            return SR.Result.ErrorUncategorized;
                         }
 
                         var choice = Console.ReadKey($"File exists ({outputPath})  overwrite? [y/N]: ");
