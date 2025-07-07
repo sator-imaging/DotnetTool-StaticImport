@@ -39,7 +39,8 @@ jobs:
 
     - name: Tests
       run: |
-        # overwrite behaviour test
-        touch -d "1970/01/01 00:00" overwrite-test.txt
+        # create files for overwrite test
+        touch -d "1970/01/01 00:00" past.txt
+        touch -d "2345/01/01 00:00" future.txt
 
         static-import ${{ inputs.args }}
