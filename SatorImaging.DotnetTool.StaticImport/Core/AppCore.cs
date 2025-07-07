@@ -11,6 +11,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 {
     internal static class AppCore
     {
+        static readonly UTF8Encoding Encoder = new(encoderShouldEmitUTF8Identifier: false);
+
         public static async ValueTask<int> ProcessAsync(
             string[] inputUrlOrFilePaths,
             string outputDirOrFilePath,
@@ -78,6 +80,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                     return SR.Result.ErrorUncategorized;
                 }
 
+                string resultMessage = string.Empty;
+
                 var outputInfo = new FileInfo(outputPath);
                 if (outputInfo.Exists)
                 {
@@ -85,7 +89,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                     {
                         if (inputInfo.LastWriteTimeUtc <= outputInfo.LastWriteTimeUtc)
                         {
-                            Console.WriteImportantLine($"Output file is up to date: {outputPath}");
+                            Console.WriteImportantLine($"Up to date: {outputPath}");
                             continue;
                         }
 
@@ -102,6 +106,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                             continue;
                         }
                     }
+
+                    resultMessage = "[overwritten] ";
                 }
 
                 // apply only when input file is .cs file.
@@ -114,19 +120,20 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                         var sourceCode = await File.ReadAllTextAsync(inputPath, ct);
                         var outputFileContent = typeMigrator.Migrate(sourceCode, newNamespace, makeTypeInternal);
 
-                        await File.WriteAllTextAsync(outputPath, outputFileContent, Encoding.UTF8, ct);
-
-                        Console.WriteImportantLine($"File written: {outputPath}");
+                        await File.WriteAllTextAsync(outputPath, outputFileContent, Encoder, ct);
                     },
                     ct);
+
+                    resultMessage = $"{resultMessage}File written: {outputPath}";
                 }
                 else
                 {
                     File.Copy(inputPath, outputPath, overwrite: true);
 
-                    Console.WriteImportantLine($"File copied: {outputPath}");
+                    resultMessage = $"{resultMessage}File copied: {outputPath}";
                 }
 
+                Console.WriteImportantLine(resultMessage);
                 Console.WriteLine();  // spacer for non-silent mode
             }
 
