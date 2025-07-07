@@ -63,6 +63,8 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+> https://docs.github.com/actions/how-tos/security-for-github-actions/security-guides/automatic-token-authentication
+
 
 
 ## C# Script Options
