@@ -14,6 +14,8 @@
 
 On the command line, enter the following command to install package as a command.
 
+> .NET SDK 8.0+ is required
+
 ```sh
 dotnet tool install SatorImaging.DotnetTool.StaticImport -g --prerelease
 ```
@@ -29,11 +31,14 @@ dotnet tool install SatorImaging.DotnetTool.StaticImport -g --prerelease
 Copy files to current folder with `Import_` prefix:
 
 ```sh
-static-import -o "." -op "Import_" --timeout 3000 -i \
+static-import -o "." -i \
     "local-file.cs" \
     "github:user@repo/BRANCH_TAG_OR_COMMIT/path/to/file.cs" \
     "https://inter.net/path/to/file.cs"
 ```
+
+
+For the use in GitHub Actions, see [.github/workflows/tests.yml](.github/workflows/tests.yml) for details.
 
 
 
@@ -49,7 +54,7 @@ github:<USER_NAME>@<REPO_NAME>/<REF>/path/to/file.ext
 - REF: branch name, tag or commit hash
 
 
-If the environment variable `GITHUB_TOKEN` is defined, it is used for accesss to GitHub.
+If the environment variable `GH_TOKEN` or `GITHUB_TOKEN` is defined, it is used for accesss to GitHub.
 
 Here shows how to setup the variable in `.yml` file.
 
