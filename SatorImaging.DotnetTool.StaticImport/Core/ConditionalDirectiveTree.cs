@@ -121,25 +121,10 @@ internal class ConditionalDirectiveTree
 
     static List<List<string>> BuildSymbolCombinations(Node rootNode)
     {
-        var allNodes = new List<Node>(SR.DefaultListCapacity * 2);
-        {
-            getNodes(rootNode, allNodes);
-
-            static void getNodes(Node node, List<Node> symbols)
-            {
-                symbols.Add(node);
-
-                foreach (var child in node.Children)
-                {
-                    getNodes(child, symbols);
-                }
-            }
-        }
-
         var result = new List<List<string>>(collection: [[]]);  // always insert empty!
 
         // all possible symbol combinations can be built from tip node.
-        foreach (var tip in allNodes.Where(x => x.Children.Count == 0))
+        foreach (var tip in flattenHierarchy(rootNode).Where(x => x.Children.Count == 0))
         {
             impl(tip, result);
         }
@@ -152,6 +137,19 @@ internal class ConditionalDirectiveTree
 
 
         /* =====  impl  ===== */
+
+        static IEnumerable<Node> flattenHierarchy(Node node)
+        {
+            yield return node;
+
+            foreach (var child in node.Children)
+            {
+                foreach (var x in flattenHierarchy(child))
+                {
+                    yield return x;
+                }
+            }
+        }
 
         // recall, max possible combinations of 8 elements is 256.
         // that is the same as combinations of bit flags, 0b_0000_0000 to 0b_1111_1111.
@@ -175,7 +173,7 @@ internal class ConditionalDirectiveTree
             }
 
             // cannot use sizeof(long) due to array size limit.
-            const int MAX_ITEMS = (sizeof(int) * 8) - 1;  // cannot use most significant bit!!
+            const int MAX_ITEMS = (sizeof(int) * 8) - 1;  // don't use sign bit. max array size is about int.MaxValue.
 
             if (symbolList.Count > MAX_ITEMS)
             {
