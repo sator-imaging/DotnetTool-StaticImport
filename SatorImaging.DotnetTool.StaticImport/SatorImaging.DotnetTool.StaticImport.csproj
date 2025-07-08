@@ -29,8 +29,8 @@
   <PropertyGroup Condition=" '$(Configuration)'=='Release' ">
     <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
-    <PublishReadyToRun>true</PublishReadyToRun>
     <!--
+    <PublishReadyToRun>true</PublishReadyToRun>
     <PublishSingleFile>true</PublishSingleFile>
     -->
   </PropertyGroup>
