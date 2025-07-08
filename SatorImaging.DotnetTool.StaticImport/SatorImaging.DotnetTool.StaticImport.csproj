@@ -30,7 +30,9 @@
     <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
     <PublishReadyToRun>true</PublishReadyToRun>
+    <!--
     <PublishSingleFile>true</PublishSingleFile>
+    -->
   </PropertyGroup>
 
   <!-- don't create LANG dir in bin/ folder -->
