@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
-    <RootNamespace>SatorImaging.DotnetTool.StaticImport</RootNamespace>
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
     <ImplicitUsings>false</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
@@ -26,6 +26,13 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)'=='Release' ">
+    <PublishAot>true</PublishAot>
+    <PublishTrimmed>true</PublishTrimmed>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishSingleFile>true</PublishSingleFile>
+  </PropertyGroup>
+
   <!-- don't create LANG dir in bin/ folder -->
   <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' != 'true'">
     <SatelliteResourceLanguages>en;en-US</SatelliteResourceLanguages>
@@ -45,11 +52,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta5.25306.1" />
+  </ItemGroup>
+
+  <ItemGroup  Condition=" '$(Building)' != 'true' ">
     <PackageReference Include="SatorImaging.StaticMemberAnalyzer" Version="2.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta5.25306.1" />
   </ItemGroup>
 
 </Project>
