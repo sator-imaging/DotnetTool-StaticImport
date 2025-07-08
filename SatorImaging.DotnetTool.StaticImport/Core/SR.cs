@@ -17,7 +17,7 @@ internal static class SR
     public const int DefaultListCapacity = 8;
 
     public const string UserAgentName = $"{nameof(SatorImaging)}.{nameof(DotnetTool)}.{nameof(StaticImport)}";
-    public const string UserAgentVersion = "1.0.0";
+    public const string UserAgentVersion = "3.1.0";
 
     // https://cli.github.com/manual/gh_help_environment
     public const string GitHubTokenVarName1st = "GH_TOKEN";
