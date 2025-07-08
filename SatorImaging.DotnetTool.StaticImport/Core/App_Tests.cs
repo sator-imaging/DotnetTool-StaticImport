@@ -15,18 +15,101 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
     {
         public static void RunAllTests()
         {
-            ParseDirectiveTree();
-            GitHubUrlBuilder();
+            SymbolCombinationTest();
+            ParseComplexDirectiveTreeTest();
 
-            if (!Console.CanReadKey)
-                throw new Exception("cannot read key");
-
-            var key = Console.ReadKey("ReadKey timeout test (1,000ms): ", 1000);
-            Console.WriteLine($"Modifiers: '{key.Modifiers}'  Key: '{key.Key}'  KeyChar: '{key.KeyChar}'");
+            GitHubUrlBuilderTest();
+            ReadKeyTest();
         }
 
 
-        static void ParseDirectiveTree()
+        static void SymbolCombinationTest()
+        {
+            static void expectError(string code)
+            {
+                try
+                {
+                    _ = ConditionalDirectiveTree.Parse(code);
+                }
+                catch (Exception error)
+                {
+                    Console.WriteLine($"Expected exception: {error.Message}");
+                    return;
+                }
+
+                throw new Exception($"Expected exception has not thrown: {code}");
+            }
+
+            expectError("#if false\n#endif");  // this script file is loaded by other test case. don't use raw string literal here!
+
+            //// seems that roslyn parser won't parse unnecessary directives
+            //expectError("""
+            //    #endif
+            //    #if true
+            //    #endif
+            //    #endif
+            //    """);
+
+            var rootNode = ConditionalDirectiveTree.Parse("""
+                #if ONE && TWO
+                    #if THREE && FOUR
+                      #if FIVE
+                      #elif SIX
+                      #endif
+                    #endif
+                #elif SEVEN && EIGHT
+                    #if NINE
+                    #endif
+                #endif
+
+                #if TEN
+                #endif
+
+                // duplicates must be ignored
+                #if TEN
+                #if TEN == TEN
+                #elif TEN == TEN
+                #elif TEN == TEN
+                #endif
+                #elif TEN
+                #endif
+
+                // must be parsed as empty node
+                #if true
+                #endif
+                """);
+
+            if (rootNode.Children.Last().Symbols.Count != 0)
+            {
+                throw new Exception($"[FAILED] {nameof(SymbolCombinationTest)}: last node Symbols must be empty");
+            }
+
+            var expected =
+                // no symbol
+                1
+                // #if tree
+                + (Math.Pow(2, 5) - 1)
+                + (Math.Pow(2, 5) - 1)
+                    // remove same combinations (#if ONE && TWO + #if THREE && FOUR)
+                    - (Math.Pow(2, 4) - 1)
+                // #elif tree
+                + (Math.Pow(2, 3) - 1)
+                // #if TEN and duplicates
+                + 1
+                // #if true
+                + 0
+                ;
+
+            DumpDirectiveTreeInfo(rootNode);
+
+            var combo = rootNode.ToSymbolCombinations();
+            if (combo.Count != expected)
+            {
+                throw new Exception($"[FAILED] {nameof(SymbolCombinationTest)}: expected count is {expected} but was {combo.Count}");
+            }
+        }
+
+        static void ParseComplexDirectiveTreeTest()
         {
             impl();
 
@@ -38,34 +121,40 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 var sourceCode = File.ReadAllText(thisScriptFilePath);
 
                 var rootNode = ConditionalDirectiveTree.Parse(sourceCode);
-                {
-                    write(rootNode, 0);
 
-                    static void write(ConditionalDirectiveTree.Node node, int level)
-                    {
-                        Console.WriteDebugOnlyLine($"{level}: {new string(' ', level * 2)}{node}");
-
-                        foreach (var child in node.Children)
-                        {
-                            write(child, level + 1);
-                        }
-                    }
-                }
-
-                var combinations = rootNode.ToSymbolCombinations();
-
-                foreach (var combo in combinations.Select(x => x.OrderByDescending(y => y.Length)).OrderBy(x => x.FirstOrDefault()))
-                {
-                    Console.WriteDebugOnlyLine(string.Join(", ", combo));
-                }
-
-                Console.WriteDebugOnlyLine($"Total combination count: {combinations.Count}");
+                DumpDirectiveTreeInfo(rootNode);
             }
         }
 
-        static void GitHubUrlBuilder()
+        static void DumpDirectiveTreeInfo(ConditionalDirectiveTree.Node rootNode)
         {
-            foreach (var url in new string[]{
+            write(rootNode, 0);
+
+            static void write(ConditionalDirectiveTree.Node node, int level)
+            {
+                Console.WriteDebugOnlyLine($"{level}: {new string(' ', level * 2)}{node}");
+
+                foreach (var child in node.Children)
+                {
+                    write(child, level + 1);
+                }
+            }
+
+            var combinations = rootNode.ToSymbolCombinations();
+
+            foreach (var combo in combinations.Select(x => x.Order().ThenByDescending(y => y.Length)).OrderBy(x => x.FirstOrDefault()))
+            {
+                Console.WriteDebugOnlyLine(string.Join(", ", combo));
+            }
+
+            Console.WriteDebugOnlyLine($"Total combination count: {combinations.Count:#,0}");
+        }
+
+
+        static void GitHubUrlBuilderTest()
+        {
+            foreach (var url in new string[]
+            {
                 "git",
                 "github",
                 "github:",
@@ -100,6 +189,18 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
             Console.WriteLine($"Successfully parsed: {correctGitHubUrl}");
         }
+
+        static void ReadKeyTest()
+        {
+            if (!Console.CanReadKey)
+            {
+                Console.WriteWarning("cannot read key");
+                return;
+            }
+
+            var key = Console.ReadKey("ReadKey timeout test (1,000ms): ", 1000);
+            Console.WriteLine($"Modifiers: '{key.Modifiers}'  Key: '{key.Key}'  KeyChar: '{key.KeyChar}'");
+        }
     }
 }
 
@@ -118,6 +219,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 // same symbol must be removed from combinations.
 #if Z_MULTI_USE
 #endif
+
 #if Z_MULTI_USE
 #elif Z_MULTI_USE
 #if Z_MULTI_USE
