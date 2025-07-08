@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -130,24 +131,45 @@ internal class TypeMigrator
         public readonly List<(string from, string to)> ChangeLog = new(SR.DefaultListCapacity);
 
         readonly string newNamespace;
+        readonly bool isPrependMode;
 
         public NamespaceRewriter(string newNamespace)
         {
             this.newNamespace = newNamespace;
+            this.isPrependMode = newNamespace.EndsWith('.');
         }
 
         public override SyntaxNode? VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
         {
-            if (node.Name.ToString() == newNamespace ||
-                // only root declaration
-                node.Ancestors().OfType<NamespaceDeclarationSyntax>().Any())
+            var oldNamespace = node.Name.ToString();
+            var newNamespace = this.newNamespace;
+
+            if (isPrependMode)
+            {
+                if (oldNamespace.StartsWith(newNamespace, StringComparison.Ordinal))
+                {
+                    return base.VisitNamespaceDeclaration(node);
+                }
+
+                newNamespace += oldNamespace;
+            }
+            else
+            {
+                if (oldNamespace == newNamespace)
+                {
+                    return base.VisitNamespaceDeclaration(node);
+                }
+            }
+
+            // ignore nested declaration
+            if (node.Ancestors().OfType<NamespaceDeclarationSyntax>().Any())
             {
                 return base.VisitNamespaceDeclaration(node);
             }
 
-            ChangeLog.Add((node.Name.ToString(), newNamespace));
+            ChangeLog.Add((oldNamespace, newNamespace));
 
-            var nameStx = SyntaxFactory.IdentifierName(this.newNamespace)
+            var nameStx = SyntaxFactory.IdentifierName(newNamespace)
                 .WithLeadingTrivia(node.Name.GetLeadingTrivia())
                 .WithTrailingTrivia(node.Name.GetTrailingTrivia())
                 ;
@@ -157,14 +179,29 @@ internal class TypeMigrator
 
         public override SyntaxNode? VisitFileScopedNamespaceDeclaration(FileScopedNamespaceDeclarationSyntax node)
         {
-            if (node.Name.ToString() == newNamespace)
+            var oldNamespace = node.Name.ToString();
+            var newNamespace = this.newNamespace;
+
+            if (isPrependMode)
             {
-                return base.VisitFileScopedNamespaceDeclaration(node);
+                if (oldNamespace.StartsWith(newNamespace, StringComparison.Ordinal))
+                {
+                    return base.VisitFileScopedNamespaceDeclaration(node);
+                }
+
+                newNamespace += oldNamespace;
+            }
+            else
+            {
+                if (oldNamespace == newNamespace)
+                {
+                    return base.VisitFileScopedNamespaceDeclaration(node);
+                }
             }
 
-            ChangeLog.Add((node.Name.ToString(), newNamespace));
+            ChangeLog.Add((oldNamespace, newNamespace));
 
-            var nameStx = SyntaxFactory.IdentifierName(this.newNamespace)
+            var nameStx = SyntaxFactory.IdentifierName(newNamespace)
                 .WithLeadingTrivia(node.Name.GetLeadingTrivia())
                 .WithTrailingTrivia(node.Name.GetTrailingTrivia())
                 ;

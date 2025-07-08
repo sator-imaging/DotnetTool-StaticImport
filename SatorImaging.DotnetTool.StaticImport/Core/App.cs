@@ -78,7 +78,10 @@ public class App
 
     static readonly Option<string> opt_namespace = new("--namespace")
     {
-        Description = "[C#] Change namespace",
+        Description = """
+            [C#] Change namespace
+                 If name is ending with '.', it will be prepended
+            """,
     };
 
     static readonly Option<bool> opt_internal = new("--internal")
