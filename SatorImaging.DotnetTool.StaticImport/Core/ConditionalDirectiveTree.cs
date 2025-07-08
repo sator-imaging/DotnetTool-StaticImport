@@ -71,9 +71,14 @@ internal class ConditionalDirectiveTree
                     }
                 }
 
+                if (directiveStx.IsKind(SyntaxKind.ElifDirectiveTrivia))
+                {
+                    exitCurrentParent(parentStack);
+                }
+
                 var parent = (parentStack.Count > 0) ? parentStack.Peek() : rootNode;
 
-                Console.WriteDebugOnlyLine($"{(directiveStx.IsKind(SyntaxKind.IfDirectiveTrivia) ? "IF:" : "ELIF:"),-7}{directiveStx} (parent:{parent})");
+                Console.WriteDebugOnlyLine($"{(directiveStx.IsKind(SyntaxKind.IfDirectiveTrivia) ? "IF:" : "ELIF:"),-7}{directiveStx} (parent: {parent})");
 
                 var node = new Node()
                 {
@@ -93,19 +98,20 @@ internal class ConditionalDirectiveTree
 
                 parent.Children.Add(node);
 
-                if (directiveStx.IsKind(SyntaxKind.IfDirectiveTrivia))
-                {
-                    parentStack.Push(node);
-                }
+                parentStack.Push(node);
             }
             else if (directiveStx.IsKind(SyntaxKind.EndIfDirectiveTrivia))
             {
                 Console.WriteDebugOnlyLine("ENDIF: " + directiveStx.ToString());
 
-                if (!parentStack.TryPop(out _))
-                {
+                exitCurrentParent(parentStack);
+            }
+
+            //nest
+            static void exitCurrentParent(Stack<Node> stack)
+            {
+                if (!stack.TryPop(out _))
                     throw new FormatException("#if/#elif and #endif pair is not correct");
-                }
             }
         }
 
