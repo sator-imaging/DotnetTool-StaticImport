@@ -86,8 +86,8 @@ internal class ConditionalDirectiveTree
                     Symbols = directiveStx.DescendantNodesAndSelf()
                                           .OfType<IdentifierNameSyntax>()
                                           .Select(x => x.Identifier.ValueText)
-                                          .Where(x => !string.IsNullOrWhiteSpace(x))
-                                          .OrderBy(x => x)
+                                          //.Where(x => !string.IsNullOrWhiteSpace(x))
+                                          //.OrderBy(x => x)
                                           .ToList(),
                 };
 
