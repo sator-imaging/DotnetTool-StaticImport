@@ -30,7 +30,7 @@ dotnet tool install SatorImaging.DotnetTool.StaticImport -g --prerelease
 
 # Basic Usage
 
-Copy files to current folder with `Import_` prefix:
+Here shows how to migrate files to current folder.
 
 ```sh
 static-import -o "." -i \
