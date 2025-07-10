@@ -36,9 +36,11 @@ Copy files to current folder with `Import_` prefix:
 static-import -o "." -i \
     "local-file.cs" \
     "github:user@repo/BRANCH_TAG_OR_COMMIT/path/to/file.cs" \
+    "https://gist.githubusercontent.com/..." \  # use raw url to download from gist
     "https://inter.net/path/to/file.cs"
 ```
 
+> Type `static-import --help` for more options.
 
 For the use in GitHub Actions, see [.github/workflows/tests.yml](.github/workflows/tests.yml) for details.
 
@@ -81,7 +83,27 @@ There are options to modify C# script on copying. (original file doesn't change)
     - NOTE: doesn't affect on nested types.
 - `--namespace <NAME>`
     - change namespace.
-    - NOTE: nested namespace syntaxes leave untouched.
+        - if name ending with `.`, it will be prepended (ex. `Foo.` --> `Foo.Original.Namespace`)
+    - NOTE: nested namespace *syntaxes* leave untouched.
+
+```cs
+namespace FileScoped;  // 👈 changed
+
+namespace Foo.Bar.Baz  // 👈 changed
+{
+    namespace Quuuuux  // untouched
+    {
+        public class MyClass  // 👈 changed
+        {
+            // untouched
+            public enum MyEnum { }
+            public struct MyStruct { }
+            public record MyRecord { }
+            public interface IMyInterface { }
+        }
+    }
+}
+```
 
 
 
