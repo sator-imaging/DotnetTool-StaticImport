@@ -7,6 +7,7 @@
 
 `static-import` is a dotnet cli tool to migrate file(s) from another project, github or public website.
 
+In addition, there are features to modify C# script on migration. See [C# Script Options](#c-script-options) for more details.
 
 
 
