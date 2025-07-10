@@ -151,15 +151,15 @@ internal class GitHubFileProvider  // TODO : IFileProvider
         using var req = new HttpRequestMessage(method, url);
         req.Headers.Authorization = GitHubToken;
 
-        var GET = await client.SendAsync(req, ct);
-        if (!GET.IsSuccessStatusCode)
+        var RES = await client.SendAsync(req, ct);
+        if (!RES.IsSuccessStatusCode)
         {
             return (null, null);
         }
 
-        var lastModified = GET.Content.Headers.LastModified;
+        var lastModified = RES.Content.Headers.LastModified;
 
-        var content = await GET.Content.ReadAsByteArrayAsync(ct);
+        var content = await RES.Content.ReadAsByteArrayAsync(ct);
         return (content, lastModified);
     }
 }
