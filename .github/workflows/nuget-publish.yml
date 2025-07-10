@@ -37,11 +37,18 @@ jobs:
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
         ##cache: true
+    
     - name: Restore dependencies
       run: |
         #cd src
         dotnet restore
-    - name: Build
+    
+    # TODO
+    - run: dotnet run -f net8.0 -- --TEST
+    - run: dotnet run -f net9.0 -- --TEST
+    - run: dotnet run -f net10.0 -- --TEST
+    
+    - name: Pack
       run: |
         #cd src
 
