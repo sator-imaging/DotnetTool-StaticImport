@@ -43,6 +43,7 @@ internal class ConditionalDirectiveTree
     }
 
 
+    // TODO: return ConditionalDirectiveTree instance that has access to root node of parsed result.
     public static Node Parse(string sourceCode)
     {
         var tree = CSharpSyntaxTree.ParseText(sourceCode);
