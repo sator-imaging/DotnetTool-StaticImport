@@ -141,6 +141,12 @@ internal class TypeMigrator
 
         public override SyntaxNode? VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
         {
+            // ignore nested declaration
+            if (node.Ancestors().OfType<NamespaceDeclarationSyntax>().Any())
+            {
+                return base.VisitNamespaceDeclaration(node);
+            }
+
             var oldNamespace = node.Name.ToString();
             var newNamespace = this.newNamespace;
 
@@ -159,12 +165,6 @@ internal class TypeMigrator
                 {
                     return base.VisitNamespaceDeclaration(node);
                 }
-            }
-
-            // ignore nested declaration
-            if (node.Ancestors().OfType<NamespaceDeclarationSyntax>().Any())
-            {
-                return base.VisitNamespaceDeclaration(node);
             }
 
             ChangeLog.Add((oldNamespace, newNamespace));
