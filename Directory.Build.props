@@ -26,7 +26,7 @@
     <NuGetPackageIconUrl>https://github.com/sator-imaging/DotnetTool-StaticImport/raw/main/assets/icon-128px.png</NuGetPackageIconUrl>
 
     <NuGetPackageVersion>1.0.0</NuGetPackageVersion>
-    <NuGetPackageVersionSuffix>-rc.10</NuGetPackageVersionSuffix>
+    <NuGetPackageVersionSuffix>-rc.11</NuGetPackageVersionSuffix>
   </PropertyGroup>
 
 </Project>
