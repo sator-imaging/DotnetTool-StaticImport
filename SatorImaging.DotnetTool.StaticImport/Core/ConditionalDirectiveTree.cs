@@ -18,9 +18,9 @@ internal class ConditionalDirectiveTree
     public sealed class Node
     {
         public Node? Parent;
-        public List<Node> Children = new(SR.DefaultListCapacity);
+        public readonly List<Node> Children = new(SR.DefaultListCapacity);
 
-        public List<string> Symbols = new(SR.DefaultListCapacity);
+        public readonly List<string> Symbols = new(SR.DefaultListCapacity);
 
         public override string ToString()
         {
@@ -83,13 +83,14 @@ internal class ConditionalDirectiveTree
                 var node = new Node()
                 {
                     Parent = parent,
-                    Symbols = directiveStx.DescendantNodesAndSelf()
-                                          .OfType<IdentifierNameSyntax>()
-                                          .Select(x => x.Identifier.ValueText)
-                                          //.Where(x => !string.IsNullOrWhiteSpace(x))
-                                          //.OrderBy(x => x)
-                                          .ToList(),
                 };
+
+                node.Symbols.AddRange(
+                    directiveStx.DescendantNodesAndSelf()
+                                .OfType<IdentifierNameSyntax>()
+                                .Select(x => x.Identifier.ValueText)
+                                //.Where(x => !string.IsNullOrWhiteSpace(x))
+                                );
 
                 if (node.Symbols.Count == 0)
                 {
@@ -156,7 +157,7 @@ internal class ConditionalDirectiveTree
         // --> treat element index as bit position to build all possible combinations.
         static void impl(Node tipNode, List<List<string>> result)
         {
-            var symbolList = new List<string>(SR.DefaultListCapacity * 2);
+            var symbolList = new List<string>(SR.DefaultListCapacity);
             {
                 var node = tipNode;
                 do
