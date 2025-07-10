@@ -44,6 +44,9 @@ static-import -o "." -i \
 
 For the use in GitHub Actions, see [.github/workflows/tests.yml](.github/workflows/tests.yml) for details.
 
+> [!IMPORTANT]
+> In GitHub actions, `actions/checkout` or `git pull` won't restore commit date for downloaded files so that `-f/--force-overwrite` option is required to migrate files from other repos.
+
 
 
 ## GitHub Options
@@ -56,9 +59,6 @@ In contrast to `https:`, it retrieves correct `Last-Modified` value from reposit
 github:<USER_NAME>@<REPO_NAME>/<REF>/path/to/file.ext
 ```
 - REF: branch name, tag or commit hash
-
-> [!IMPORTANT]
-> In GitHub actions, `checkout` won't restore commit date for downloaded files so that `-f/--force-overwrite` is required to migrate files from other repos.
 
 
 If the environment variable `GH_TOKEN` or `GITHUB_TOKEN` is defined, it is used for accesss to GitHub.
