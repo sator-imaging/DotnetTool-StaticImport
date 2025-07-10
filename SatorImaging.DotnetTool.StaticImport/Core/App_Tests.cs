@@ -17,9 +17,12 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         {
             SymbolCombinationTest();
             ParseComplexDirectiveTreeTest();
+            TypeMigratorTest();
 
             GitHubUrlBuilderTest();
             ReadKeyTest();
+
+            Console.WriteImportantLine("\n  !!! All tests was done !!!");
         }
 
 
@@ -151,6 +154,33 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         }
 
 
+        static void TypeMigratorTest()
+        {
+            var sourceCode = """
+                namespace Foo.Bar.Baz
+                {
+                    namespace Untouched
+                    {
+                        public class MyClass
+                        {
+                            public enum UntouchedEnum { }
+                            public struct UntouchedStruct { }
+                            public record UntouchedRecord { }
+                            public interface IUntouched { }
+                        }
+                    }
+                }
+                """;
+
+            _ = new TypeMigrator().Migrate(sourceCode, newNamespace: null, makeTypeInternal: false);
+            _ = new TypeMigrator().Migrate(sourceCode, newNamespace: null, makeTypeInternal: true);
+            _ = new TypeMigrator().Migrate(sourceCode, "ReplacedNamespace", false);
+            _ = new TypeMigrator().Migrate(sourceCode, "PrefixMode.", true);
+
+            // TODO: rewriter unit tests
+        }
+
+
         static void GitHubUrlBuilderTest()
         {
             foreach (var url in new string[]
@@ -194,7 +224,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         {
             if (!Console.CanReadKey)
             {
-                Console.WriteWarning("cannot read key");
+                Console.WriteWarning("cannot read key. skipped.");
                 return;
             }
 
