@@ -3,7 +3,9 @@
 
 #if DEBUG
 
+using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -18,11 +20,12 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             SymbolCombinationTest();
             ParseComplexDirectiveTreeTest();
             TypeMigratorTest();
+            RewriterTest();
 
             GitHubUrlBuilderTest();
             ReadKeyTest();
 
-            Console.WriteImportantLine("\n  !!! All tests was done !!!");
+            Console.WriteImportantLine('\n' + @"  \\\ All tests was done ///" + '\n');
         }
 
 
@@ -176,8 +179,74 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             _ = new TypeMigrator().Migrate(sourceCode, newNamespace: null, makeTypeInternal: true);
             _ = new TypeMigrator().Migrate(sourceCode, "ReplacedNamespace", false);
             _ = new TypeMigrator().Migrate(sourceCode, "PrefixMode.", true);
+        }
 
-            // TODO: rewriter unit tests
+        static void RewriterTest()
+        {
+            var nestedNamespaces = """
+                namespace Root.Name.Space
+                {
+                    namespace NestedNS
+                    {
+                        namespace DeepNestNS { }
+                    }
+                }
+                """;
+
+            var root = CSharpSyntaxTree.ParseText(nestedNamespaces).GetRoot();
+
+            var ns = new TypeMigrator.NamespaceRewriter("REP");
+            ns.Visit(root);
+            Debug.Assert(ns.ChangeLog.Count == 1);
+            Debug.Assert(ns.ChangeLog[0].from == "Root.Name.Space");
+            Debug.Assert(ns.ChangeLog[0].to == "REP");
+
+            ns = new TypeMigrator.NamespaceRewriter("PREFIX.");
+            ns.Visit(root);
+            Debug.Assert(ns.ChangeLog.Count == 1);
+            Debug.Assert(ns.ChangeLog[0].from == "Root.Name.Space");
+            Debug.Assert(ns.ChangeLog[0].to == "PREFIX.Root.Name.Space");
+
+            var fileScopedNsWithTypes = """
+                namespace File.Scoped;
+
+                public class Root
+                {
+                    public class Nested
+                    {
+                        public class DeepNest { }
+                    }
+                }
+                public record RootRecord { }
+                public struct RootStruct { }
+                public interface IRoot { }
+                public enum ERoot { }
+                """;
+
+            root = CSharpSyntaxTree.ParseText(fileScopedNsWithTypes).GetRoot();
+
+            ns = new TypeMigrator.NamespaceRewriter("REP");
+            ns.Visit(root);
+            Debug.Assert(ns.ChangeLog.Count == 1);
+            Debug.Assert(ns.ChangeLog[0].from == "File.Scoped");
+            Debug.Assert(ns.ChangeLog[0].to == "REP");
+
+            ns = new TypeMigrator.NamespaceRewriter("PREFIX.");
+            ns.Visit(root);
+            Debug.Assert(ns.ChangeLog.Count == 1);
+            Debug.Assert(ns.ChangeLog[0].from == "File.Scoped");
+            Debug.Assert(ns.ChangeLog[0].to == "PREFIX.File.Scoped");
+
+            var modifier = new TypeMigrator.TypeModifierRewriter(SyntaxKind.PublicKeyword, SyntaxKind.InternalKeyword);
+            modifier.Visit(root);
+            Debug.Assert(modifier.ChangeLog.Count == 5);
+            Debug.Assert(modifier.ChangeLog[0] == "Root");
+            Debug.Assert(modifier.ChangeLog[1] == "RootRecord");
+            Debug.Assert(modifier.ChangeLog[2] == "RootStruct");
+            Debug.Assert(modifier.ChangeLog[3] == "IRoot");
+            Debug.Assert(modifier.ChangeLog[4] == "ERoot");
+
+            Console.WriteImportantLine("\ntype rewriter unit tests were done\n");
         }
 
 

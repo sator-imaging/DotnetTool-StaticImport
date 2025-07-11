@@ -80,7 +80,7 @@ internal class TypeMigrator
     }
 
 
-    class TypeModifierRewriter : CSharpSyntaxRewriter
+    internal class TypeModifierRewriter : CSharpSyntaxRewriter
     {
         public readonly List<string> ChangeLog = new(SR.DefaultListCapacity);
 
@@ -126,7 +126,7 @@ internal class TypeMigrator
     }
 
 
-    class NamespaceRewriter : CSharpSyntaxRewriter
+    internal class NamespaceRewriter : CSharpSyntaxRewriter
     {
         public readonly List<(string from, string to)> ChangeLog = new(SR.DefaultListCapacity);
 
