@@ -13,6 +13,15 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
     {
         static readonly UTF8Encoding Encoder = new(encoderShouldEmitUTF8Identifier: false);
 
+        // TODO: new logic to reduce network traffic and provide IFileProvider/IContentTransformer extension points.
+        //       - create IFileProvider (local/http/github)
+        //       - fileProvider.TryGetLastModifiedDate (head request)
+        //         - null if remote file not found
+        //         - DateTimeOffset.Now if no Last-Modified header found
+        //       - compare lastModified and overwrite if requested
+        //       - fileProvider.TryGetContent
+        //       - apply IContentTransformer (TypeMigrator, etc.)
+        //       - write file.
         public static async ValueTask<int> ProcessAsync(
             string[] inputUrlOrFilePaths,
             string outputDirOrFilePath,
@@ -99,7 +108,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                             return SR.Result.ErrorUncategorized;
                         }
 
-                        var choice = Console.ReadKey($"File exists ({outputPath})  overwrite? [y/N]: ");
+                        var choice = Console.ReadKey($"File exists ({outputPath})  overwrite? [N/y]: ");
                         if (choice.Key != ConsoleKey.Y)
                         {
                             Console.WriteImportantLine($"Skipped: {outputPath}");
