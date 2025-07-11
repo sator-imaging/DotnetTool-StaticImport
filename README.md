@@ -19,10 +19,8 @@ On the command line, enter the following command to install package as a command
 > .NET SDK 8.0+ is required
 
 ```sh
-dotnet tool install SatorImaging.DotnetTool.StaticImport -g --prerelease
+dotnet tool install -g SatorImaging.DotnetTool.StaticImport
 ```
-
-&nbsp; * `--prerelease` is required at this moment.
 
 
 
