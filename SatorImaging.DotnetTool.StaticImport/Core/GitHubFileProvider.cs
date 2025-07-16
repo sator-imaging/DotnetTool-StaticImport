@@ -78,7 +78,7 @@ internal class GitHubFileProvider  // TODO : IFileProvider
 
     static Uri BuildContentUrl(string userName, string repoName, string REF, string filePath)
     {
-        var url = new Uri($"{SR.GitHubHostName}/{userName}/{repoName}/raw/{REF}/{filePath}");
+        var url = new Uri($"{SR.GitHubRawContentHostName}/{userName}/{repoName}/{REF}/{filePath}");
 
         Console.WriteDebugOnlyLine($"GitHub Content URL: {url}");
         return url;
@@ -154,6 +154,7 @@ internal class GitHubFileProvider  // TODO : IFileProvider
         var RES = await client.SendAsync(req, ct);
         if (!RES.IsSuccessStatusCode)
         {
+            Console.WriteWarning($"{RES}");
             return (null, null);
         }
 
