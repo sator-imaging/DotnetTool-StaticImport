@@ -34,4 +34,5 @@ internal static class SR
     public const string GitHubSchemeFull = GitHubScheme + ":";
     public const string GitHubHostName = "https://github.com";
     public const string GitHubApiHostName = "https://api.github.com";
+    public const string GitHubRawContentHostName = "https://raw.githubusercontent.com";
 }

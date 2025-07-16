@@ -31,6 +31,7 @@ internal class HttpFileProvider  // TODO : IFileProvider
         var GET = await client.GetAsync(url, ct);
         if (!GET.IsSuccessStatusCode)
         {
+            Console.WriteWarning($"{GET}");
             return (null, null);
         }
 
