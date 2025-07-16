@@ -1,4 +1,5 @@
-[![img.shields.io](https://img.shields.io/nuget/v/SatorImaging.DotnetTool.StaticImport)](https://www.nuget.org/packages/SatorImaging.DotnetTool.StaticImport/)
+[![](https://img.shields.io/nuget/v/static-import?label=dnx%20static-import)](https://www.nuget.org/packages/static-import/)
+[![](https://img.shields.io/nuget/v/SatorImaging.DotnetTool.StaticImport)](https://www.nuget.org/packages/SatorImaging.DotnetTool.StaticImport/)
 [![nuget-publish.yml](https://github.com/sator-imaging/DotnetTool-StaticImport/actions/workflows/nuget-publish.yml/badge.svg)](https://github.com/sator-imaging/DotnetTool-StaticImport/actions/workflows/nuget-publish.yml)
 &nbsp;
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sator-imaging/DotnetTool-StaticImport)
@@ -20,6 +21,15 @@ On the command line, enter the following command to install package as a command
 
 ```sh
 dotnet tool install -g SatorImaging.DotnetTool.StaticImport
+```
+
+
+## `dnx` Support
+
+With .NET SDK 10.0 preview 6 or later, it can be run with `dnx` command like as follows, without installation.
+
+```sh
+dnx static-import --yes -- <OPTIONS>
 ```
 
 
