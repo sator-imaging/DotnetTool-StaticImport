@@ -186,7 +186,7 @@ internal class ConditionalDirectiveTree
             var unorderedComparer = new UnorderedListStringComparer();
 
             int comboCount = (int)Math.Pow(2, symbolsSpan.Length);
-            result.Capacity += comboCount;
+            result.Capacity = result.Count + (comboCount - 1);
 
             for (int i = 1; i < comboCount; i++)  // exclude 0
             {

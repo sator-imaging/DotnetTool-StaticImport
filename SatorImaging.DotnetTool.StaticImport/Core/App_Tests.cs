@@ -25,7 +25,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             GitHubUrlBuilderTest();
             ReadKeyTest();
 
-            Console.WriteImportantLine('\n' + @"  \\\ All tests was done ///" + '\n');
+            Console.WriteImportantLine('\n' + @"  \\\ All tests were done ///" + '\n');
         }
 
 
