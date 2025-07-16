@@ -1,0 +1,48 @@
+name: invoke tool on runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      args:
+        type: string
+        default: "--internal --namespace \"New\" --input-files \"alpha\" \"bravo\""
+        required: true
+
+env:
+  # listed in precedence order
+  GH_TOKEN: ${{ github.token }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '8.0.x', '9.0.x', '10.0.x' ]
+
+    steps:
+    #- name: Checkout
+    #  uses: actions/checkout@v4
+
+    - name: Setup .NET ${{ matrix.dotnet-version }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+
+    - name: Install
+      run: |
+        dotnet tool install SatorImaging.DotnetTool.StaticImport -g --prerelease
+
+    - name: Env
+      run: |
+        env
+
+    - name: Tests
+      run: |
+        # create files for overwrite test
+        touch -d "1970/01/01 00:00" past.txt
+        touch -d "2345/01/01 00:00" future.txt
+
+        printf 'args: ${{ inputs.args }}\n'
+
+        static-import ${{ inputs.args }}

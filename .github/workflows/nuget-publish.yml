@@ -58,12 +58,15 @@ jobs:
         # ex: including github actions yaml files
         dotnet pack -c Release --no-restore  -p:ContinuousIntegrationBuild=true
 
+        # short name for dnx
+        dotnet pack -c Release --no-restore  -p:ContinuousIntegrationBuild=true  -p:PackAsCommandName=true
+
     - name: NuGet push
       run: |
         #ls -R
         #cd src
 
-        dotnet nuget push "${{ env.push_source  }}"  \
+        dotnet nuget push "${{ env.push_source }}"  \
           -k ${{ secrets.NUGET_API_KEY }}  \
           -s https://api.nuget.org/v3/index.json \
           --timeout 60
