@@ -10,22 +10,34 @@ using System.Linq;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core;
 
-#pragma warning disable IDE0290  // Use primary constructor
-
-internal class TypeMigrator
+internal class TypeMigrator : IContentTransformer
 {
-    public string Migrate(string csharpSourceCode, string? newNamespace, bool makeTypeInternal)
+    private readonly string? _newNamespace;
+    private readonly bool _makeTypeInternal;
+
+    public TypeMigrator(string? newNamespace, bool makeTypeInternal)
+    {
+        _newNamespace = newNamespace;
+        _makeTypeInternal = makeTypeInternal;
+    }
+
+    public string Transform(string csharpSourceCode)
     {
         NamespaceRewriter? namespaceRewriter = null;
-        if (!string.IsNullOrWhiteSpace(newNamespace))
+        if (!string.IsNullOrWhiteSpace(_newNamespace))
         {
-            namespaceRewriter = new NamespaceRewriter(newNamespace);
+            namespaceRewriter = new NamespaceRewriter(_newNamespace);
         }
 
         TypeModifierRewriter? visibilityRewriter = null;
-        if (makeTypeInternal)
+        if (_makeTypeInternal)
         {
             visibilityRewriter = new TypeModifierRewriter(SyntaxKind.PublicKeyword, SyntaxKind.InternalKeyword);
+        }
+
+        if (namespaceRewriter == null && visibilityRewriter == null)
+        {
+            return csharpSourceCode;
         }
 
         // when preprocessor symbol is used in C# source code, all combinations must be enabled to process file correctly.
@@ -41,42 +53,41 @@ internal class TypeMigrator
             var root = tree.GetCompilationUnitRoot();
 
             Console.WriteLine($"# {(symbols.Count == 0 ? "No Symbol" : "Symbols: " + string.Join(", ", symbols))}");
-            csharpSourceCode = rewrite(root, namespaceRewriter, visibilityRewriter);
+            csharpSourceCode = Rewrite(root, namespaceRewriter, visibilityRewriter);
         }
 
         return csharpSourceCode;
+    }
 
-        //nest
-        static string rewrite(SyntaxNode root, NamespaceRewriter? namespaceRewriter, TypeModifierRewriter? visibilityRewriter)
+    private static string Rewrite(SyntaxNode root, NamespaceRewriter? namespaceRewriter, TypeModifierRewriter? visibilityRewriter)
+    {
+        const string PREFIX = "\n- ";
+
+        if (namespaceRewriter != null)
         {
-            const string PREFIX = "\n- ";
+            root = namespaceRewriter.Visit(root);
 
-            if (namespaceRewriter != null)
+            var changes = namespaceRewriter.ChangeLog;
+            if (changes.Count > 0)
             {
-                root = namespaceRewriter.Visit(root);
-
-                var changes = namespaceRewriter.ChangeLog;
-                if (changes.Count > 0)
-                {
-                    Console.WriteLine($"## {nameof(NamespaceRewriter)}: {changes.Count} change(s){PREFIX}{string.Join(PREFIX, changes)}");
-                    changes.Clear();
-                }
+                Console.WriteLine($"## {nameof(NamespaceRewriter)}: {changes.Count} change(s){PREFIX}{string.Join(PREFIX, changes.Select(c => $"{c.from} -> {c.to}"))}");
+                changes.Clear();
             }
-
-            if (visibilityRewriter != null)
-            {
-                root = visibilityRewriter.Visit(root);
-
-                var changes = visibilityRewriter.ChangeLog;
-                if (changes.Count > 0)
-                {
-                    Console.WriteLine($"## {nameof(TypeModifierRewriter)}: {changes.Count} change(s){PREFIX}{string.Join(PREFIX, changes)}");
-                    changes.Clear();
-                }
-            }
-
-            return root.ToFullString();
         }
+
+        if (visibilityRewriter != null)
+        {
+            root = visibilityRewriter.Visit(root);
+
+            var changes = visibilityRewriter.ChangeLog;
+            if (changes.Count > 0)
+            {
+                Console.WriteLine($"## {nameof(TypeModifierRewriter)}: {changes.Count} change(s){PREFIX}{string.Join(PREFIX, changes)}");
+                changes.Clear();
+            }
+        }
+
+        return root.ToFullString();
     }
 
 

@@ -2,42 +2,94 @@
 // https://github.com/sator-imaging/DotnetTool-StaticImport
 
 using System;
-using System.Runtime.CompilerServices;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core;
 
-internal class HttpFileProvider  // TODO : IFileProvider
+internal class HttpFileProvider : IFileProvider
 {
-#pragma warning disable IDE0079
-#pragma warning disable CA1822   // Instance/Default/Shared members should not be made static
-#pragma warning restore IDE0079
+    public static HttpFileProvider Instance { get; } = new();
 
-    public static HttpFileProvider Instance { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = new();
+    private HttpFileProvider() { }
 
-    protected HttpFileProvider() { }
-
-
-    public async ValueTask<(byte[]? content, DateTimeOffset? lastModified)> TryGetAsync(string url, CancellationToken ct = default)
+    public async ValueTask<DateTimeOffset?> TryGetLastModifiedDateAsync(Uri uri, CancellationToken ct = default)
     {
-        if (!url.StartsWith(SR.HttpsSchemeFull, StringComparison.OrdinalIgnoreCase))
+        if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
         {
-            throw new ArgumentException($"invalid url scheme: {url}");
+            return null;
         }
 
-        var client = HttpClient.Shared;
-
-        var GET = await client.GetAsync(url, ct);
-        if (!GET.IsSuccessStatusCode)
+        try
         {
-            Console.WriteWarning($"{GET}");
-            return (null, null);
+            using var request = new HttpRequestMessage(HttpMethod.Head, uri);
+            using var response = await HttpClient.Shared.SendAsync(request, ct);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteWarning($"File not found: {uri}");
+                return null;
+            }
+
+            // some servers doesn't support HEAD request.
+            if (response.StatusCode == System.Net.HttpStatusCode.MethodNotAllowed)
+            {
+                Console.WriteWarning($"HEAD method not allowed for: {uri}");
+                // fallback to GET request.
+                return await TryGetLastModifiedDateByGetRequestAsync(uri, ct);
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            return response.Content.Headers.LastModified ?? DateTimeOffset.Now;
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteError($"Error getting last modified date for {uri}: {ex.Message}");
+            return null;
+        }
+    }
+
+    private async ValueTask<DateTimeOffset?> TryGetLastModifiedDateByGetRequestAsync(Uri uri, CancellationToken ct)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+            using var response = await HttpClient.Shared.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteWarning($"File not found: {uri}");
+                return null;
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            return response.Content.Headers.LastModified ?? DateTimeOffset.Now;
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteError($"Error getting last modified date for {uri}: {ex.Message}");
+            return null;
+        }
+    }
+
+    public async ValueTask<byte[]?> TryGetContentAsync(Uri uri, CancellationToken ct = default)
+    {
+        if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+        {
+            return null;
         }
 
-        var lastModified = GET.Content.Headers.LastModified;
-
-        var content = await GET.Content.ReadAsByteArrayAsync(ct);
-        return (content, lastModified);
+        try
+        {
+            return await HttpClient.Shared.GetByteArrayAsync(uri, ct);
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteError($"Error getting content for {uri}: {ex.Message}");
+            return null;
+        }
     }
 }

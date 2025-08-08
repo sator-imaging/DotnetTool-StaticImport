@@ -6,12 +6,13 @@ using System.Collections.Immutable;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core;
 
-internal class GitHubFileProvider  // TODO : IFileProvider
+internal class GitHubFileProvider : IFileProvider
 {
     internal static (string userName, string repoName, string REF, string filePath) ParseUrl(ReadOnlySpan<char> input)
     {
@@ -39,7 +40,7 @@ internal class GitHubFileProvider  // TODO : IFileProvider
         }
 
         string userName = userAndRepo[..pos_atMark].ToString();
-        string repoName = userAndRepo[(pos_atMark + 1)..pos_pathStart].ToString();
+        string repoName = userAndRepo[(pos_atMark + 1)..].ToString();
 
         if (string.IsNullOrWhiteSpace(userName) ||
             string.IsNullOrWhiteSpace(repoName))
@@ -75,34 +76,25 @@ internal class GitHubFileProvider  // TODO : IFileProvider
         return (userName, repoName, REF, filePath);
     }
 
-
     static Uri BuildContentUrl(string userName, string repoName, string REF, string filePath)
     {
         var url = new Uri($"{SR.GitHubRawContentHostName}/{userName}/{repoName}/{REF}/{filePath}");
-
         Console.WriteDebugOnlyLine($"GitHub Content URL: {url}");
         return url;
     }
 
     static Uri BuildApiUrl(string userName, string repoName, string REF, string filePath)
     {
-        var url = new Uri($"{SR.GitHubApiHostName}/repos/{userName}/{repoName}/commits?sha={REF}&path=/{filePath}");
-
+        var url = new Uri($"{SR.GitHubApiHostName}/repos/{userName}/{repoName}/commits?sha={REF}&path={filePath}&per_page=1");
         Console.WriteDebugOnlyLine($"GitHub Commits API: {url}");
         return url;
     }
 
+    public static GitHubFileProvider Instance { get; } = new();
 
-#pragma warning disable IDE0079
-#pragma warning disable CA1822   // Instance/Default/Shared members should not be made static
-#pragma warning restore IDE0079
+    private GitHubFileProvider() { }
 
-    public static GitHubFileProvider Instance { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = new();
-
-    protected GitHubFileProvider() { }
-
-
-    public AuthenticationHeaderValue? GitHubToken { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; private set; }
+    public AuthenticationHeaderValue? GitHubToken { get; private set; }
 
     public void Initialize()
     {
@@ -110,57 +102,104 @@ internal class GitHubFileProvider  // TODO : IFileProvider
         {
             var token = Environment.GetEnvironmentVariable(varName, EnvironmentVariableTarget.Process)
                      ?? Environment.GetEnvironmentVariable(varName, EnvironmentVariableTarget.User)
-                     ?? Environment.GetEnvironmentVariable(varName, EnvironmentVariableTarget.Machine)
-                     ;
+                     ?? Environment.GetEnvironmentVariable(varName, EnvironmentVariableTarget.Machine);
 
             if (!string.IsNullOrWhiteSpace(token))
             {
                 GitHubToken = new("Bearer", token);
-
                 Console.WriteImportantLine($"'{varName}' was loaded");
                 break;
             }
         }
     }
 
-
-    public async ValueTask<(byte[]? content, DateTimeOffset? lastModified)> TryGetAsync(string url, CancellationToken ct = default)
+    public async ValueTask<DateTimeOffset?> TryGetLastModifiedDateAsync(Uri uri, CancellationToken ct = default)
     {
-        var (userName, repoName, REF, filePath) = ParseUrl(url);
-
-        var modDateTask = DownloadAsync(HttpMethod.Head, BuildApiUrl(userName, repoName, REF, filePath).ToString(), ct);
-        var contentTask = DownloadAsync(HttpMethod.Get, BuildContentUrl(userName, repoName, REF, filePath).ToString(), ct);
-
-        await Task.WhenAll(modDateTask, contentTask);
-
-        var (_, lastModified) = modDateTask.Result;
-        var (content, _) = contentTask.Result;
-
-        return (content, lastModified);
-    }
-
-
-    async Task<(byte[]? content, DateTimeOffset? lastModified)> DownloadAsync(
-        HttpMethod method,
-        string url,
-        CancellationToken ct = default
-        )
-    {
-        var client = HttpClient.Shared;
-
-        using var req = new HttpRequestMessage(method, url);
-        req.Headers.Authorization = GitHubToken;
-
-        var RES = await client.SendAsync(req, ct);
-        if (!RES.IsSuccessStatusCode)
+        if (uri.Scheme != SR.GitHubScheme)
         {
-            Console.WriteWarning($"{RES}");
-            return (null, null);
+            return null;
         }
 
-        var lastModified = RES.Content.Headers.LastModified;
+        var (userName, repoName, REF, filePath) = ParseUrl(uri.ToString());
+        var apiUrl = BuildApiUrl(userName, repoName, REF, filePath);
 
-        var content = await RES.Content.ReadAsByteArrayAsync(ct);
-        return (content, lastModified);
+        using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
+        if (GitHubToken != null)
+        {
+            request.Headers.Authorization = GitHubToken;
+        }
+
+        try
+        {
+            using var response = await HttpClient.Shared.SendAsync(request, ct);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteWarning($"File not found on GitHub: {uri}");
+                return null;
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync(ct);
+            using var doc = JsonDocument.Parse(json);
+            var commits = doc.RootElement;
+
+            if (commits.GetArrayLength() > 0)
+            {
+                var lastCommit = commits[0];
+                if (lastCommit.TryGetProperty("commit", out var commit) &&
+                    commit.TryGetProperty("committer", out var committer) &&
+                    committer.TryGetProperty("date", out var dateElement) &&
+                    dateElement.TryGetDateTimeOffset(out var date))
+                {
+                    return date;
+                }
+            }
+            // if no commit history, fallback to Now.
+            return DateTimeOffset.Now;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteError($"Error getting last modified date from GitHub for {uri}: {ex.Message}");
+            return null;
+        }
+    }
+
+    public async ValueTask<byte[]?> TryGetContentAsync(Uri uri, CancellationToken ct = default)
+    {
+        if (uri.Scheme != SR.GitHubScheme)
+        {
+            return null;
+        }
+
+        var (userName, repoName, REF, filePath) = ParseUrl(uri.ToString());
+        var contentUrl = BuildContentUrl(userName, repoName, REF, filePath);
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, contentUrl);
+        if (GitHubToken != null)
+        {
+            request.Headers.Authorization = GitHubToken;
+        }
+
+        try
+        {
+            using var response = await HttpClient.Shared.SendAsync(request, ct);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Console.WriteWarning($"File not found on GitHub: {uri}");
+                return null;
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsByteArrayAsync(ct);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteError($"Error getting content from GitHub for {uri}: {ex.Message}");
+            return null;
+        }
     }
 }

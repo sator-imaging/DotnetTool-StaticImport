@@ -175,10 +175,10 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 }
                 """;
 
-            _ = new TypeMigrator().Migrate(sourceCode, newNamespace: null, makeTypeInternal: false);
-            _ = new TypeMigrator().Migrate(sourceCode, newNamespace: null, makeTypeInternal: true);
-            _ = new TypeMigrator().Migrate(sourceCode, "ReplacedNamespace", false);
-            _ = new TypeMigrator().Migrate(sourceCode, "PrefixMode.", true);
+            _ = new TypeMigrator(null, false).Transform(sourceCode);
+            _ = new TypeMigrator(null, true).Transform(sourceCode);
+            _ = new TypeMigrator("ReplacedNamespace", false).Transform(sourceCode);
+            _ = new TypeMigrator("PrefixMode.", true).Transform(sourceCode);
         }
 
         static void RewriterTest()
