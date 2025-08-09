@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core;
 
@@ -14,7 +15,25 @@ namespace SatorImaging.DotnetTool.StaticImport.Core;
 
 internal class TypeMigrator : IContentTransformer
 {
-    public string Transform(string content, string? newNamespace, bool makeTypeInternal)
+    private static readonly UTF8Encoding Encoder = new(encoderShouldEmitUTF8Identifier: false);
+
+    private readonly string? _newNamespace;
+    private readonly bool _makeTypeInternal;
+
+    public TypeMigrator(string? newNamespace, bool makeTypeInternal)
+    {
+        _newNamespace = newNamespace;
+        _makeTypeInternal = makeTypeInternal;
+    }
+
+    public byte[] Transform(byte[] content)
+    {
+        var sourceCode = Encoder.GetString(content);
+        var transformedCode = Migrate(sourceCode, _newNamespace, _makeTypeInternal);
+        return Encoder.GetBytes(transformedCode);
+    }
+
+    private string Migrate(string content, string? newNamespace, bool makeTypeInternal)
     {
         NamespaceRewriter? namespaceRewriter = null;
         if (!string.IsNullOrWhiteSpace(newNamespace))

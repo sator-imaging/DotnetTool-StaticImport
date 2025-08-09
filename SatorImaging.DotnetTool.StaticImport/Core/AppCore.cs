@@ -35,7 +35,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 }
             }
 
-            var typeMigrator = new TypeMigrator();
+            var typeMigrator = new TypeMigrator(newNamespace, makeTypeInternal);
 
             foreach (var inputUrlOrPath in inputUrlOrFilePaths)
             {
@@ -143,10 +143,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                     await Task.Run(async () =>
                     {
                         Console.WriteLine(); // spacer
-
-                        var sourceCode = Encoder.GetString(contentBytes);
-                        var transformedCode = typeMigrator.Transform(sourceCode, newNamespace, makeTypeInternal);
-                        await File.WriteAllTextAsync(outputPath, transformedCode, Encoder, ct);
+                        var transformedBytes = typeMigrator.Transform(contentBytes);
+                        await File.WriteAllBytesAsync(outputPath, transformedBytes, ct);
                     }, ct);
 
                     resultMessage += $"File written: {outputPath}";

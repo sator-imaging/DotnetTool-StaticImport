@@ -204,11 +204,12 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                     }
                 }
                 """;
+            var sourceCodeBytes = System.Text.Encoding.UTF8.GetBytes(sourceCode);
 
-            _ = new TypeMigrator().Transform(sourceCode, newNamespace: null, makeTypeInternal: false);
-            _ = new TypeMigrator().Transform(sourceCode, newNamespace: null, makeTypeInternal: true);
-            _ = new TypeMigrator().Transform(sourceCode, "ReplacedNamespace", false);
-            _ = new TypeMigrator().Transform(sourceCode, "PrefixMode.", true);
+            _ = new TypeMigrator(null, false).Transform(sourceCodeBytes);
+            _ = new TypeMigrator(null, true).Transform(sourceCodeBytes);
+            _ = new TypeMigrator("ReplacedNamespace", false).Transform(sourceCodeBytes);
+            _ = new TypeMigrator("PrefixMode.", true).Transform(sourceCodeBytes);
         }
 
         static void RewriterTest()
