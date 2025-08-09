@@ -38,8 +38,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         /// <param name="uri">The input URI.</param>
         /// <param name="outputDirOrFilePath">The base output directory or file path.</param>
         /// <param name="outputFilePrefix">An optional prefix for the output filename.</param>
-        /// <param name="isOutputDirectory">A flag indicating if the base path is a directory.</param>
         /// <returns>The calculated full output path.</returns>
-        string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix, bool isOutputDirectory);
+        string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix);
     }
 }

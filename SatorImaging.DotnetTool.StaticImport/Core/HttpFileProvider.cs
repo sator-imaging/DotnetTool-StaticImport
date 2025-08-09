@@ -76,9 +76,9 @@ internal class HttpFileProvider : IFileProvider
         }
     }
 
-        public string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix, bool isOutputDirectory)
+        public string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix)
         {
-            if (!isOutputDirectory)
+            if (!Directory.Exists(outputDirOrFilePath))
             {
                 return outputDirOrFilePath;
             }

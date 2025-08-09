@@ -18,7 +18,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         static AppCore()
         {
             _fileProviders[SR.HttpsScheme] = HttpFileProvider.Instance;
-            _fileProviders["http"] = HttpFileProvider.Instance;
+            _fileProviders[SR.HttpScheme] = HttpFileProvider.Instance;
             _fileProviders[SR.GitHubScheme] = GitHubFileProvider.Instance;
             _fileProviders[SR.FileScheme] = LocalFileProvider.Instance;
         }
@@ -64,7 +64,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                         Console.WriteError($"Unsupported URI scheme: {inputUri.Scheme}");
                         return SR.Result.ErrorUncategorized;
                     }
-                    outputPath = fileProvider.GetOutputFilePath(inputUri, outputDirOrFilePath, outputFilePrefix, isOutputDirectory);
+                    outputPath = fileProvider.GetOutputFilePath(inputUri, outputDirOrFilePath, outputFilePrefix);
                 }
                 else
                 {

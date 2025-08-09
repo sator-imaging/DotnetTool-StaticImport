@@ -23,7 +23,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         {
             public ValueTask<byte[]?> TryGetContentAsync(string uri, CancellationToken ct = default) => new(Encoding.UTF8.GetBytes("dummy content"));
             public ValueTask<DateTimeOffset?> TryGetLastModifiedDateAsync(string uri, CancellationToken ct = default) => new(DateTimeOffset.Now);
-            public string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix, bool isOutputDirectory) => "dummy_path";
+            public string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix) => "dummy_path";
         }
 
         public static void RunAllTests()
