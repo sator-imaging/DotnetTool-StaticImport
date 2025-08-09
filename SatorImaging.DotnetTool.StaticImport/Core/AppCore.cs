@@ -40,21 +40,23 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             foreach (var inputUrlOrPath in inputUrlOrFilePaths)
             {
                 IFileProvider fileProvider;
-                string providerInput;
-                string outputPath;
+                string outputPath = outputDirOrFilePath;
 
                 if (Uri.TryCreate(inputUrlOrPath, UriKind.Absolute, out var inputUri))
                 {
                     switch (inputUri.Scheme)
                     {
                         case SR.HttpsScheme:
-                        case SR.GitHubScheme:
-                            fileProvider = (inputUri.Scheme == SR.HttpsScheme)
-                                ? (IFileProvider)HttpFileProvider.Instance
-                                : GitHubFileProvider.Instance;
-                            providerInput = inputUrlOrPath;
+                            fileProvider = HttpFileProvider.Instance;
+                            if (isOutputDirectory)
+                            {
+                                string fileName = Path.GetFileName(inputUri.AbsolutePath);
+                                outputPath = Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
+                            }
+                            break;
 
-                            outputPath = outputDirOrFilePath;
+                        case SR.GitHubScheme:
+                            fileProvider = GitHubFileProvider.Instance;
                             if (isOutputDirectory)
                             {
                                 string fileName = Path.GetFileName(inputUri.AbsolutePath);
@@ -64,12 +66,9 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
                         case SR.FileScheme:
                             fileProvider = LocalFileProvider.Instance;
-                            providerInput = inputUri.LocalPath;
-
-                            outputPath = outputDirOrFilePath;
                             if (isOutputDirectory)
                             {
-                                string fileName = Path.GetFileName(providerInput);
+                                string fileName = Path.GetFileName(inputUri.LocalPath);
                                 outputPath = Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
                             }
                             break;
@@ -83,21 +82,17 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 {
                     // Not an absolute URI, assume it's a local file path.
                     fileProvider = LocalFileProvider.Instance;
-                    providerInput = Path.GetFullPath(inputUrlOrPath);
-
-                    outputPath = outputDirOrFilePath;
                     if (isOutputDirectory)
                     {
-                        string fileName = Path.GetFileName(providerInput);
+                        string fileName = Path.GetFileName(inputUrlOrPath);
                         outputPath = Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
                     }
                 }
 
-                // 3. Get Last Modified Dates and Compare
-                var sourceLastModified = await fileProvider.TryGetLastModifiedDateAsync(providerInput, ct);
+                var sourceLastModified = await fileProvider.TryGetLastModifiedDateAsync(inputUrlOrPath, ct);
                 if (sourceLastModified == null)
                 {
-                    Console.WriteError($"Input not found or could not be accessed: {providerInput}");
+                    Console.WriteError($"Input not found or could not be accessed: {inputUrlOrPath}");
                     return SR.Result.ErrorUncategorized;
                 }
 
@@ -130,15 +125,13 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 }
 
 
-                // 4. Get Content
-                var contentBytes = await fileProvider.TryGetContentAsync(providerInput, ct);
+                var contentBytes = await fileProvider.TryGetContentAsync(inputUrlOrPath, ct);
                 if (contentBytes == null)
                 {
-                    Console.WriteError($"Failed to get content for: {providerInput}");
+                    Console.WriteError($"Failed to get content for: {inputUrlOrPath}");
                     return SR.Result.ErrorUncategorized;
                 }
 
-                // 5. Transform and Write File
                 bool applyCSharpScriptFilter = isCSharpScriptMode && IsCSharpScriptFile(outputPath);
                 if (applyCSharpScriptFilter)
                 {
@@ -157,7 +150,6 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                     resultMessage += $"File copied: {outputPath}";
                 }
 
-                // 6. Set LastWriteTime
                 File.SetLastWriteTimeUtc(outputPath, sourceLastModified.Value.UtcDateTime);
 
                 Console.WriteImportantLine(resultMessage);
