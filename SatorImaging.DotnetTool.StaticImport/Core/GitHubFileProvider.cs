@@ -171,9 +171,9 @@ internal class GitHubFileProvider : IFileProvider
         return await res.Content.ReadAsByteArrayAsync(ct);
     }
 
-        public string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix)
+    public string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix)
     {
-            if (!Directory.Exists(outputDirOrFilePath))
+        if (!Directory.Exists(outputDirOrFilePath))
         {
             return outputDirOrFilePath;
         }
