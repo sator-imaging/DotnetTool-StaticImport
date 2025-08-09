@@ -39,27 +39,41 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
             foreach (var inputUrlOrPath in inputUrlOrFilePaths)
             {
-                // 1. Determine File Provider
                 IFileProvider fileProvider;
-                string? sourceLocation = null;
-                string providerInput = inputUrlOrPath;
-                Uri? inputUri;
+                string providerInput;
+                string outputPath;
 
-                if (Uri.TryCreate(inputUrlOrPath, UriKind.Absolute, out inputUri))
+                if (Uri.TryCreate(inputUrlOrPath, UriKind.Absolute, out var inputUri))
                 {
                     switch (inputUri.Scheme)
                     {
                         case SR.HttpsScheme:
-                            fileProvider = HttpFileProvider.Instance;
-                            break;
                         case SR.GitHubScheme:
-                            fileProvider = GitHubFileProvider.Instance;
+                            fileProvider = (inputUri.Scheme == SR.HttpsScheme)
+                                ? (IFileProvider)HttpFileProvider.Instance
+                                : GitHubFileProvider.Instance;
+                            providerInput = inputUrlOrPath;
+
+                            outputPath = outputDirOrFilePath;
+                            if (isOutputDirectory)
+                            {
+                                string fileName = Path.GetFileName(inputUri.AbsolutePath);
+                                outputPath = Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
+                            }
                             break;
+
                         case SR.FileScheme:
                             fileProvider = LocalFileProvider.Instance;
-                            sourceLocation = inputUri.LocalPath;
-                            providerInput = sourceLocation;
+                            providerInput = inputUri.LocalPath;
+
+                            outputPath = outputDirOrFilePath;
+                            if (isOutputDirectory)
+                            {
+                                string fileName = Path.GetFileName(providerInput);
+                                outputPath = Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
+                            }
                             break;
+
                         default:
                             Console.WriteError($"Unsupported URI scheme: {inputUri.Scheme}");
                             return SR.Result.ErrorUncategorized;
@@ -69,26 +83,14 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 {
                     // Not an absolute URI, assume it's a local file path.
                     fileProvider = LocalFileProvider.Instance;
-                    sourceLocation = Path.GetFullPath(inputUrlOrPath);
-                    providerInput = sourceLocation;
-                }
+                    providerInput = Path.GetFullPath(inputUrlOrPath);
 
-                // 2. Determine Output Path
-                string outputPath = outputDirOrFilePath;
-                if (isOutputDirectory)
-                {
-                    string fileName;
-                    if (sourceLocation == null)
+                    outputPath = outputDirOrFilePath;
+                    if (isOutputDirectory)
                     {
-                        // Remote file. Uri.TryCreate must have succeeded.
-                        fileName = Path.GetFileName(inputUri!.AbsolutePath);
+                        string fileName = Path.GetFileName(providerInput);
+                        outputPath = Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
                     }
-                    else
-                    {
-                        // Local file
-                        fileName = Path.GetFileName(sourceLocation);
-                    }
-                    outputPath = Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
                 }
 
                 // 3. Get Last Modified Dates and Compare
