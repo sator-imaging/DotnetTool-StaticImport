@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Immutable;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
@@ -168,5 +169,15 @@ internal class GitHubFileProvider : IFileProvider
         }
 
         return await res.Content.ReadAsByteArrayAsync(ct);
+    }
+
+    public string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix, bool isOutputDirectory)
+    {
+        if (!isOutputDirectory)
+        {
+            return outputDirOrFilePath;
+        }
+        string fileName = Path.GetFileName(uri.AbsolutePath);
+        return Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
     }
 }

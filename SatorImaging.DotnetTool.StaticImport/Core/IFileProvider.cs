@@ -31,5 +31,15 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         /// <param name="ct">A cancellation token.</param>
         /// <returns>A byte array of the file content, or <c>null</c> if the file is not found.</returns>
         ValueTask<byte[]?> TryGetContentAsync(string uri, CancellationToken ct = default);
+
+        /// <summary>
+        /// Gets the output file path for a given URI.
+        /// </summary>
+        /// <param name="uri">The input URI.</param>
+        /// <param name="outputDirOrFilePath">The base output directory or file path.</param>
+        /// <param name="outputFilePrefix">An optional prefix for the output filename.</param>
+        /// <param name="isOutputDirectory">A flag indicating if the base path is a directory.</param>
+        /// <returns>The calculated full output path.</returns>
+        string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix, bool isOutputDirectory);
     }
 }

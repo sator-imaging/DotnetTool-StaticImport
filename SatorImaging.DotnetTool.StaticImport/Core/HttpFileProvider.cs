@@ -74,4 +74,14 @@ internal class HttpFileProvider : IFileProvider
             return null;
         }
     }
+
+        public string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix, bool isOutputDirectory)
+        {
+            if (!isOutputDirectory)
+            {
+                return outputDirOrFilePath;
+            }
+            string fileName = Path.GetFileName(uri.AbsolutePath);
+            return Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
+        }
 }

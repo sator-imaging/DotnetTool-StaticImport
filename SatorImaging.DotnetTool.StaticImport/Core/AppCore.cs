@@ -40,7 +40,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             foreach (var inputUrlOrPath in inputUrlOrFilePaths)
             {
                 IFileProvider fileProvider;
-                string outputPath = outputDirOrFilePath;
+                string outputPath;
 
                 if (Uri.TryCreate(inputUrlOrPath, UriKind.Absolute, out var inputUri))
                 {
@@ -48,40 +48,24 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                     {
                         case SR.HttpsScheme:
                             fileProvider = HttpFileProvider.Instance;
-                            if (isOutputDirectory)
-                            {
-                                string fileName = Path.GetFileName(inputUri.AbsolutePath);
-                                outputPath = Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
-                            }
                             break;
-
                         case SR.GitHubScheme:
                             fileProvider = GitHubFileProvider.Instance;
-                            if (isOutputDirectory)
-                            {
-                                string fileName = Path.GetFileName(inputUri.AbsolutePath);
-                                outputPath = Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
-                            }
                             break;
-
                         case SR.FileScheme:
                             fileProvider = LocalFileProvider.Instance;
-                            if (isOutputDirectory)
-                            {
-                                string fileName = Path.GetFileName(inputUri.LocalPath);
-                                outputPath = Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
-                            }
                             break;
-
                         default:
                             Console.WriteError($"Unsupported URI scheme: {inputUri.Scheme}");
                             return SR.Result.ErrorUncategorized;
                     }
+                    outputPath = fileProvider.GetOutputFilePath(inputUri, outputDirOrFilePath, outputFilePrefix, isOutputDirectory);
                 }
                 else
                 {
-                    // Not an absolute URI, assume it's a local file path.
+                    // URI creation failed, use existing logic.
                     fileProvider = LocalFileProvider.Instance;
+                    outputPath = outputDirOrFilePath;
                     if (isOutputDirectory)
                     {
                         string fileName = Path.GetFileName(inputUrlOrPath);
