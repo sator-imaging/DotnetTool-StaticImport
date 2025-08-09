@@ -2,6 +2,7 @@
 // https://github.com/sator-imaging/DotnetTool-StaticImport
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -12,6 +13,20 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
     internal static class AppCore
     {
         static readonly UTF8Encoding Encoder = new(encoderShouldEmitUTF8Identifier: false);
+        private static readonly Dictionary<string, IFileProvider> _fileProviders = new();
+
+        static AppCore()
+        {
+            _fileProviders[SR.HttpsScheme] = HttpFileProvider.Instance;
+            _fileProviders["http"] = HttpFileProvider.Instance;
+            _fileProviders[SR.GitHubScheme] = GitHubFileProvider.Instance;
+            _fileProviders[SR.FileScheme] = LocalFileProvider.Instance;
+        }
+
+        public static void RegisterFileProvider(string scheme, IFileProvider provider)
+        {
+            _fileProviders[scheme] = provider;
+        }
 
         public static async ValueTask<int> ProcessAsync(
             string[] inputUrlOrFilePaths,
@@ -39,33 +54,22 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
             foreach (var inputUrlOrPath in inputUrlOrFilePaths)
             {
-                IFileProvider fileProvider;
-                string outputPath;
+                IFileProvider? fileProvider;
+                string outputPath = outputDirOrFilePath;
 
                 if (Uri.TryCreate(inputUrlOrPath, UriKind.Absolute, out var inputUri))
                 {
-                    switch (inputUri.Scheme)
+                    if (!_fileProviders.TryGetValue(inputUri.Scheme, out fileProvider) || fileProvider == null)
                     {
-                        case SR.HttpsScheme:
-                            fileProvider = HttpFileProvider.Instance;
-                            break;
-                        case SR.GitHubScheme:
-                            fileProvider = GitHubFileProvider.Instance;
-                            break;
-                        case SR.FileScheme:
-                            fileProvider = LocalFileProvider.Instance;
-                            break;
-                        default:
-                            Console.WriteError($"Unsupported URI scheme: {inputUri.Scheme}");
-                            return SR.Result.ErrorUncategorized;
+                        Console.WriteError($"Unsupported URI scheme: {inputUri.Scheme}");
+                        return SR.Result.ErrorUncategorized;
                     }
                     outputPath = fileProvider.GetOutputFilePath(inputUri, outputDirOrFilePath, outputFilePrefix, isOutputDirectory);
                 }
                 else
                 {
-                    // URI creation failed, use existing logic.
+                    // Not an absolute URI, assume it's a local file path.
                     fileProvider = LocalFileProvider.Instance;
-                    outputPath = outputDirOrFilePath;
                     if (isOutputDirectory)
                     {
                         string fileName = Path.GetFileName(inputUrlOrPath);
