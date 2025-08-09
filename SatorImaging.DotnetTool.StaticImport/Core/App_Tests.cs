@@ -17,6 +17,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
     {
         public static void RunAllTests()
         {
+            FileProviderTest();
             SymbolCombinationTest();
             ParseComplexDirectiveTreeTest();
             TypeMigratorTest();
@@ -26,6 +27,35 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             ReadKeyTest();
 
             Console.WriteImportantLine('\n' + @"  \\\ All tests were done ///" + '\n');
+        }
+
+
+        static void FileProviderTest()
+        {
+            // Create a dummy file for testing
+            const string testFilePath = "test.txt";
+            const string testFileContent = "Hello, World!";
+            File.WriteAllText(testFilePath, testFileContent);
+            var fileProvider = LocalFileProvider.Instance;
+
+            // Test GetContent
+            var content = fileProvider.TryGetContentAsync(testFilePath).GetAwaiter().GetResult();
+            Debug.Assert(content != null);
+            Debug.Assert(System.Text.Encoding.UTF8.GetString(content) == testFileContent);
+
+            // Test GetLastModifiedDate
+            var lastModified = fileProvider.TryGetLastModifiedDateAsync(testFilePath).GetAwaiter().GetResult();
+            Debug.Assert(lastModified != null);
+
+            // Test non-existent file
+            var nonExistentPath = "nonexistent.txt";
+            content = fileProvider.TryGetContentAsync(nonExistentPath).GetAwaiter().GetResult();
+            Debug.Assert(content == null);
+            lastModified = fileProvider.TryGetLastModifiedDateAsync(nonExistentPath).GetAwaiter().GetResult();
+            Debug.Assert(lastModified == null);
+
+            File.Delete(testFilePath);
+            Console.WriteImportantLine("\nFileProviderTest was done\n");
         }
 
 
@@ -175,10 +205,10 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 }
                 """;
 
-            _ = new TypeMigrator().Migrate(sourceCode, newNamespace: null, makeTypeInternal: false);
-            _ = new TypeMigrator().Migrate(sourceCode, newNamespace: null, makeTypeInternal: true);
-            _ = new TypeMigrator().Migrate(sourceCode, "ReplacedNamespace", false);
-            _ = new TypeMigrator().Migrate(sourceCode, "PrefixMode.", true);
+            _ = new TypeMigrator().Transform(sourceCode, newNamespace: null, makeTypeInternal: false);
+            _ = new TypeMigrator().Transform(sourceCode, newNamespace: null, makeTypeInternal: true);
+            _ = new TypeMigrator().Transform(sourceCode, "ReplacedNamespace", false);
+            _ = new TypeMigrator().Transform(sourceCode, "PrefixMode.", true);
         }
 
         static void RewriterTest()

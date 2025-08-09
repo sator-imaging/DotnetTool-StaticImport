@@ -12,9 +12,9 @@ namespace SatorImaging.DotnetTool.StaticImport.Core;
 
 #pragma warning disable IDE0290  // Use primary constructor
 
-internal class TypeMigrator
+internal class TypeMigrator : IContentTransformer
 {
-    public string Migrate(string csharpSourceCode, string? newNamespace, bool makeTypeInternal)
+    public string Transform(string content, string? newNamespace, bool makeTypeInternal)
     {
         NamespaceRewriter? namespaceRewriter = null;
         if (!string.IsNullOrWhiteSpace(newNamespace))
@@ -30,21 +30,21 @@ internal class TypeMigrator
 
         // when preprocessor symbol is used in C# source code, all combinations must be enabled to process file correctly.
         // --> C# parser will skip creating syntax tree enclosed by directive that condition is not met.
-        foreach (var symbols in ConditionalDirectiveTree.Parse(csharpSourceCode).ToSymbolCombinations())
+        foreach (var symbols in ConditionalDirectiveTree.Parse(content).ToSymbolCombinations())
         {
             var options = symbols.Count == 0
                 ? CSharpParseOptions.Default
                 : CSharpParseOptions.Default.WithPreprocessorSymbols(symbols)
                 ;
 
-            var tree = CSharpSyntaxTree.ParseText(csharpSourceCode, options);
+            var tree = CSharpSyntaxTree.ParseText(content, options);
             var root = tree.GetCompilationUnitRoot();
 
             Console.WriteLine($"# {(symbols.Count == 0 ? "No Symbol" : "Symbols: " + string.Join(", ", symbols))}");
-            csharpSourceCode = rewrite(root, namespaceRewriter, visibilityRewriter);
+            content = rewrite(root, namespaceRewriter, visibilityRewriter);
         }
 
-        return csharpSourceCode;
+        return content;
 
         //nest
         static string rewrite(SyntaxNode root, NamespaceRewriter? namespaceRewriter, TypeModifierRewriter? visibilityRewriter)

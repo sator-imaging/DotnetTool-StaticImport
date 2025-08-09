@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core;
 
-internal class GitHubFileProvider  // TODO : IFileProvider
+internal class GitHubFileProvider : IFileProvider
 {
     internal static (string userName, string repoName, string REF, string filePath) ParseUrl(ReadOnlySpan<char> input)
     {
@@ -87,7 +87,6 @@ internal class GitHubFileProvider  // TODO : IFileProvider
     static Uri BuildApiUrl(string userName, string repoName, string REF, string filePath)
     {
         var url = new Uri($"{SR.GitHubApiHostName}/repos/{userName}/{repoName}/commits?sha={REF}&path=/{filePath}");
-
         Console.WriteDebugOnlyLine($"GitHub Commits API: {url}");
         return url;
     }
@@ -123,44 +122,51 @@ internal class GitHubFileProvider  // TODO : IFileProvider
         }
     }
 
-
-    public async ValueTask<(byte[]? content, DateTimeOffset? lastModified)> TryGetAsync(string url, CancellationToken ct = default)
+    private async Task<HttpResponseMessage?> SendRequestAsync(HttpMethod method, string url, CancellationToken ct)
     {
-        var (userName, repoName, REF, filePath) = ParseUrl(url);
-
-        var modDateTask = DownloadAsync(HttpMethod.Head, BuildApiUrl(userName, repoName, REF, filePath).ToString(), ct);
-        var contentTask = DownloadAsync(HttpMethod.Get, BuildContentUrl(userName, repoName, REF, filePath).ToString(), ct);
-
-        await Task.WhenAll(modDateTask, contentTask);
-
-        var (_, lastModified) = modDateTask.Result;
-        var (content, _) = contentTask.Result;
-
-        return (content, lastModified);
+        try
+        {
+            var client = HttpClient.Shared;
+            using var req = new HttpRequestMessage(method, url);
+            req.Headers.Authorization = GitHubToken;
+            return await client.SendAsync(req, ct);
+        }
+        catch (HttpRequestException e)
+        {
+            Console.WriteWarning(e.ToString());
+            return null;
+        }
     }
 
-
-    async Task<(byte[]? content, DateTimeOffset? lastModified)> DownloadAsync(
-        HttpMethod method,
-        string url,
-        CancellationToken ct = default
-        )
+    public async ValueTask<DateTimeOffset?> TryGetLastModifiedDateAsync(string uri, CancellationToken ct = default)
     {
-        var client = HttpClient.Shared;
+        var (userName, repoName, REF, filePath) = ParseUrl(uri);
+        var apiUrl = BuildApiUrl(userName, repoName, REF, filePath).ToString();
 
-        using var req = new HttpRequestMessage(method, url);
-        req.Headers.Authorization = GitHubToken;
+        var res = await SendRequestAsync(HttpMethod.Head, apiUrl, ct);
 
-        var RES = await client.SendAsync(req, ct);
-        if (!RES.IsSuccessStatusCode)
+        if (res == null || !res.IsSuccessStatusCode)
         {
-            Console.WriteWarning($"{RES}");
-            return (null, null);
+            if (res != null) Console.WriteWarning($"{res}");
+            return null;
         }
 
-        var lastModified = RES.Content.Headers.LastModified;
+        return res.Content.Headers.LastModified ?? DateTimeOffset.Now;
+    }
 
-        var content = await RES.Content.ReadAsByteArrayAsync(ct);
-        return (content, lastModified);
+    public async ValueTask<byte[]?> TryGetContentAsync(string uri, CancellationToken ct = default)
+    {
+        var (userName, repoName, REF, filePath) = ParseUrl(uri);
+        var contentUrl = BuildContentUrl(userName, repoName, REF, filePath).ToString();
+
+        var res = await SendRequestAsync(HttpMethod.Get, contentUrl, ct);
+
+        if (res == null || !res.IsSuccessStatusCode)
+        {
+            if (res != null) Console.WriteWarning($"{res}");
+            return null;
+        }
+
+        return await res.Content.ReadAsByteArrayAsync(ct);
     }
 }

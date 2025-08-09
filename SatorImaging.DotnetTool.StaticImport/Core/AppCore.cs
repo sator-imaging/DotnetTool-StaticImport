@@ -13,15 +13,6 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
     {
         static readonly UTF8Encoding Encoder = new(encoderShouldEmitUTF8Identifier: false);
 
-        // TODO: new logic to reduce network traffic and provide IFileProvider/IContentTransformer extension points.
-        //       - create IFileProvider (local/http/github)
-        //       - fileProvider.TryGetLastModifiedDate (head request)
-        //         - null if remote file not found
-        //         - DateTimeOffset.Now if no Last-Modified header found
-        //       - compare lastModified and overwrite if requested
-        //       - fileProvider.TryGetContent
-        //       - apply IContentTransformer (TypeMigrator, etc.)
-        //       - write file.
         public static async ValueTask<int> ProcessAsync(
             string[] inputUrlOrFilePaths,
             string outputDirOrFilePath,
@@ -44,59 +35,66 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 }
             }
 
-            var uriCreationOptions = new UriCreationOptions();
             var typeMigrator = new TypeMigrator();
 
             foreach (var inputUrlOrPath in inputUrlOrFilePaths)
             {
-                _ = Uri.TryCreate(inputUrlOrPath, uriCreationOptions, out Uri? inputUrl);
+                // 1. Determine File Provider
+                IFileProvider fileProvider;
+                string sourceLocation = inputUrlOrPath;
 
+                if (Uri.TryCreate(inputUrlOrPath, UriKind.Absolute, out var inputUri))
+                {
+                    switch (inputUri.Scheme)
+                    {
+                        case SR.HttpsScheme:
+                            fileProvider = HttpFileProvider.Instance;
+                            break;
+                        case SR.GitHubScheme:
+                            fileProvider = GitHubFileProvider.Instance;
+                            break;
+                        case SR.FileScheme:
+                            fileProvider = LocalFileProvider.Instance;
+                            sourceLocation = inputUri.LocalPath;
+                            break;
+                        default:
+                            Console.WriteError($"Unsupported URI scheme: {inputUri.Scheme}");
+                            return SR.Result.ErrorUncategorized;
+                    }
+                }
+                else
+                {
+                    // Not an absolute URI, assume it's a local file path.
+                    fileProvider = LocalFileProvider.Instance;
+                    sourceLocation = Path.GetFullPath(inputUrlOrPath);
+                }
+
+                // 2. Determine Output Path
                 string outputPath = outputDirOrFilePath;
-
                 if (isOutputDirectory)
                 {
-                    string fileName = (inputUrl == null)
-                        ? Path.GetFileName(inputUrlOrPath)
-                        : Path.GetFileName(inputUrl.AbsolutePath)
-                        ;
+                    string fileName = (inputUri?.Scheme == SR.HttpsScheme || inputUri?.Scheme == SR.GitHubScheme)
+                        ? Path.GetFileName(inputUri.AbsolutePath)
+                        : Path.GetFileName(sourceLocation);
 
                     outputPath = Path.Combine(outputDirOrFilePath, (outputFilePrefix + fileName));
                 }
 
-                string? inputPath = inputUrlOrPath;
-
-                // need to check before downloading file.
-                bool applyCSharpScriptFilter = isCSharpScriptMode && IsCSharpScriptFile(inputPath);
-
-                if (inputUrl != null)
+                // 3. Get Last Modified Dates and Compare
+                var sourceLastModified = await fileProvider.TryGetLastModifiedDateAsync(sourceLocation, ct);
+                if (sourceLastModified == null)
                 {
-                    // full path of local file may be parsed as url, ignore it.
-                    if (inputUrl.Scheme != SR.FileScheme)
-                    {
-                        inputPath = await TryDownloadFileAsync(inputUrl, ct);
-
-                        if (inputPath == null)
-                        {
-                            return SR.Result.ErrorUncategorized;
-                        }
-                    }
-                }
-
-                var inputInfo = new FileInfo(inputPath);
-                if (!inputInfo.Exists)
-                {
-                    Console.WriteError($"Input file is not found: {inputPath}");
+                    Console.WriteError($"Input not found or could not be accessed: {sourceLocation}");
                     return SR.Result.ErrorUncategorized;
                 }
 
                 string resultMessage = string.Empty;
-
                 var outputInfo = new FileInfo(outputPath);
                 if (outputInfo.Exists)
                 {
                     if (!forceOverwrite)
                     {
-                        if (inputInfo.LastWriteTimeUtc <= outputInfo.LastWriteTimeUtc)
+                        if (sourceLastModified.Value.ToUniversalTime() <= outputInfo.LastWriteTimeUtc)
                         {
                             Console.WriteImportantLine($"Up to date: {outputPath}");
                             continue;
@@ -115,35 +113,44 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                             continue;
                         }
                     }
-
                     resultMessage = "[overwritten] ";
                 }
 
-                // apply only when input file is .cs file.
+
+                // 4. Get Content
+                var contentBytes = await fileProvider.TryGetContentAsync(sourceLocation, ct);
+                if (contentBytes == null)
+                {
+                    Console.WriteError($"Failed to get content for: {sourceLocation}");
+                    return SR.Result.ErrorUncategorized;
+                }
+
+                // 5. Transform and Write File
+                bool applyCSharpScriptFilter = isCSharpScriptMode && IsCSharpScriptFile(outputPath);
                 if (applyCSharpScriptFilter)
                 {
                     await Task.Run(async () =>
                     {
-                        Console.WriteLine();  // spacer for non-silent mode
+                        Console.WriteLine(); // spacer
 
-                        var sourceCode = await File.ReadAllTextAsync(inputPath, ct);
-                        var outputFileContent = typeMigrator.Migrate(sourceCode, newNamespace, makeTypeInternal);
+                        var sourceCode = Encoder.GetString(contentBytes);
+                        var transformedCode = typeMigrator.Transform(sourceCode, newNamespace, makeTypeInternal);
+                        await File.WriteAllTextAsync(outputPath, transformedCode, Encoder, ct);
+                    }, ct);
 
-                        await File.WriteAllTextAsync(outputPath, outputFileContent, Encoder, ct);
-                    },
-                    ct);
-
-                    resultMessage = $"{resultMessage}File written: {outputPath}";
+                    resultMessage += $"File written: {outputPath}";
                 }
                 else
                 {
-                    File.Copy(inputPath, outputPath, overwrite: true);
-
-                    resultMessage = $"{resultMessage}File copied: {outputPath}";
+                    await File.WriteAllBytesAsync(outputPath, contentBytes, ct);
+                    resultMessage += $"File copied: {outputPath}";
                 }
 
+                // 6. Set LastWriteTime
+                File.SetLastWriteTimeUtc(outputPath, sourceLastModified.Value.UtcDateTime);
+
                 Console.WriteImportantLine(resultMessage);
-                Console.WriteLine();  // spacer for non-silent mode
+                Console.WriteLine();  // spacer
             }
 
             return SR.Result.Succeeded;
@@ -153,60 +160,6 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         static bool IsCSharpScriptFile(string filePath)
         {
             return filePath.EndsWith(SR.EXT_CS, StringComparison.OrdinalIgnoreCase);
-        }
-
-
-        static async Task<string?> TryDownloadFileAsync(Uri url, CancellationToken ct = default)
-        {
-            byte[]? downloadedBytes = null;
-            DateTimeOffset? lastModified = null;
-
-            if (url.Scheme == SR.GitHubScheme)
-            {
-                (downloadedBytes, lastModified) = await GitHubFileProvider.Instance.TryGetAsync(url.ToString(), ct);
-
-                if (downloadedBytes == null)
-                {
-                    Console.WriteError($"Failed to download from GitHub: {url}");
-                    goto ERROR;
-                }
-            }
-            else if (url.Scheme == SR.HttpsScheme)
-            {
-                (downloadedBytes, lastModified) = await HttpFileProvider.Instance.TryGetAsync(url.ToString(), ct);
-
-                if (downloadedBytes == null)
-                {
-                    Console.WriteError($"Failed to download from url: {url}");
-                    goto ERROR;
-                }
-            }
-
-            if (downloadedBytes == null)
-            {
-                Console.WriteError($"Unknown url scheme: {url}");
-                goto ERROR;
-            }
-
-            //main
-            var tempFilePath = Path.GetTempFileName();
-
-            await File.WriteAllBytesAsync(tempFilePath, downloadedBytes, ct);
-
-            if (lastModified.HasValue)
-            {
-                File.SetLastWriteTimeUtc(tempFilePath, lastModified.Value.UtcDateTime);
-            }
-            else
-            {
-                Console.WriteWarning($"Cannot retrieve last modified date: {url}");
-            }
-
-
-            return tempFilePath;
-
-        ERROR:
-            return null;
         }
 
     }
