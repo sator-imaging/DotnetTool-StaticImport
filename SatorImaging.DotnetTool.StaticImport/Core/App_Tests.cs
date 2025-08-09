@@ -9,14 +9,27 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
     // hehe
     internal static class App_Tests
     {
+        // A dummy provider for a custom scheme
+        private class DummyProvider : IFileProvider
+        {
+            public ValueTask<byte[]?> TryGetContentAsync(string uri, CancellationToken ct = default) => new(Encoding.UTF8.GetBytes("dummy content"));
+            public ValueTask<DateTimeOffset?> TryGetLastModifiedDateAsync(string uri, CancellationToken ct = default) => new(DateTimeOffset.Now);
+            public string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix) => "dummy_path";
+        }
+
         public static void RunAllTests()
         {
+            FileProviderRegistrationTest();
+            FileProviderTest();
             SymbolCombinationTest();
             ParseComplexDirectiveTreeTest();
             TypeMigratorTest();
@@ -26,6 +39,40 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             ReadKeyTest();
 
             Console.WriteImportantLine('\n' + @"  \\\ All tests were done ///" + '\n');
+        }
+
+        static void FileProviderRegistrationTest()
+        {
+            AppCore.RegisterFileProvider("dummy", new DummyProvider());
+            Console.WriteImportantLine("\nFileProviderRegistrationTest was done\n");
+        }
+
+        static void FileProviderTest()
+        {
+            // Create a dummy file for testing
+            const string testFilePath = "test.txt";
+            const string testFileContent = "Hello, World!";
+            File.WriteAllText(testFilePath, testFileContent);
+            var fileProvider = LocalFileProvider.Instance;
+
+            // Test GetContent
+            var content = fileProvider.TryGetContentAsync(testFilePath).GetAwaiter().GetResult();
+            Debug.Assert(content != null);
+            Debug.Assert(Encoding.UTF8.GetString(content) == testFileContent);
+
+            // Test GetLastModifiedDate
+            var lastModified = fileProvider.TryGetLastModifiedDateAsync(testFilePath).GetAwaiter().GetResult();
+            Debug.Assert(lastModified != null);
+
+            // Test non-existent file
+            var nonExistentPath = "nonexistent.txt";
+            content = fileProvider.TryGetContentAsync(nonExistentPath).GetAwaiter().GetResult();
+            Debug.Assert(content == null);
+            lastModified = fileProvider.TryGetLastModifiedDateAsync(nonExistentPath).GetAwaiter().GetResult();
+            Debug.Assert(lastModified == null);
+
+            File.Delete(testFilePath);
+            Console.WriteImportantLine("\nFileProviderTest was done\n");
         }
 
 
@@ -174,11 +221,12 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                     }
                 }
                 """;
+            var sourceCodeBytes = Encoding.UTF8.GetBytes(sourceCode);
 
-            _ = new TypeMigrator().Migrate(sourceCode, newNamespace: null, makeTypeInternal: false);
-            _ = new TypeMigrator().Migrate(sourceCode, newNamespace: null, makeTypeInternal: true);
-            _ = new TypeMigrator().Migrate(sourceCode, "ReplacedNamespace", false);
-            _ = new TypeMigrator().Migrate(sourceCode, "PrefixMode.", true);
+            _ = new TypeMigrator(null, false).Transform(sourceCodeBytes);
+            _ = new TypeMigrator(null, true).Transform(sourceCodeBytes);
+            _ = new TypeMigrator("ReplacedNamespace", false).Transform(sourceCodeBytes);
+            _ = new TypeMigrator("PrefixMode.", true).Transform(sourceCodeBytes);
         }
 
         static void RewriterTest()

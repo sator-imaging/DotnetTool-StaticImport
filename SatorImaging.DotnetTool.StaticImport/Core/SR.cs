@@ -27,6 +27,7 @@ internal static class SR
     public const string FileScheme = "file";
     public const string FileSchemeFull = FileScheme + ":";
 
+    public const string HttpScheme = "http";
     public const string HttpsScheme = "https";
     public const string HttpsSchemeFull = HttpsScheme + "://";
 
