@@ -28,6 +28,7 @@ jobs:
 
     permissions:
       id-token: write  # enable GitHub OIDC token issuance for this job
+      contents: read   # required for private repo
 
     runs-on: ubuntu-latest
     strategy:
