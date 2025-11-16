@@ -27,7 +27,7 @@
     <NuGetPackageLicenseSPDX>MIT</NuGetPackageLicenseSPDX>
     <NuGetPackageIconUrl>https://github.com/sator-imaging/DotnetTool-StaticImport/raw/main/assets/icon-128px.png</NuGetPackageIconUrl>
 
-    <NuGetPackageVersion>1.1.0</NuGetPackageVersion>
+    <NuGetPackageVersion>1.1.1</NuGetPackageVersion>
     <NuGetPackageVersionSuffix></NuGetPackageVersionSuffix>
   </PropertyGroup>
 
