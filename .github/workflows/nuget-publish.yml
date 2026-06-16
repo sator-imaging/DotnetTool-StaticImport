@@ -56,15 +56,10 @@ jobs:
     
     - name: Pack
       run: |
-        #cd src
-
-        # required to enable deterministic build --> -p:ContinuousIntegrationBuild=true
-        # it seems that hash is calculated based on the whole git directory contents
-        # ex: including github actions yaml files
-        dotnet pack -c Release --no-restore  -p:ContinuousIntegrationBuild=true
+        dotnet pack -c Release --no-restore
 
         # short name for dnx
-        dotnet pack -c Release --no-restore  -p:ContinuousIntegrationBuild=true  -p:PackAsCommandName=true
+        dotnet pack -c Release --no-restore  -p:PackAsCommandName=true
 
     ################################
     #  NUGET
