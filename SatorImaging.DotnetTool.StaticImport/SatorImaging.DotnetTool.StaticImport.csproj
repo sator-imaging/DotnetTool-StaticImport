@@ -64,7 +64,7 @@
   </ItemGroup>
 
   <ItemGroup  Condition=" '$(Building)' != 'true' ">
-    <PackageReference Include="SatorImaging.StaticMemberAnalyzer" Version="2.0.0">
+    <PackageReference Include="SatorImaging.MeticulousAnalyzer" Version="*-*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
