@@ -351,8 +351,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
 
 #region ////////  Test Type Declarations  ////////
-#pragma warning disable CS1591 // Public declarations are syntax fixtures for visibility rewriting.
 #if true && !false
+#pragma warning disable CS1591 // Public declarations are syntax fixtures for visibility rewriting.
 
 //// NOTE: expected exception is thrown if directive is found that is always false.
 //#if false == true
@@ -462,8 +462,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
     }
 }
 
+#pragma warning restore CS1591
 #endif
 #endregion
-#pragma warning restore CS1591
 
 #endif
