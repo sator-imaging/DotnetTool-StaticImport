@@ -48,7 +48,7 @@ jobs:
         #cd src
         dotnet restore
     
-    - run: dotnet test tests/SatorImaging.DotnetTool.StaticImport.Tests.csproj
+    - run: dotnet test tests/SatorImaging.DotnetTool.StaticImport.Tests.csproj -p:Building=true
     
     - name: Pack
       run: |

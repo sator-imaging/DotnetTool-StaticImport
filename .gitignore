@@ -10,6 +10,7 @@ obj
 !.gitignore
 !.editorconfig
 !Directory.Build.*
+!global.json
 !*.slnx
 !icon*.png
 
