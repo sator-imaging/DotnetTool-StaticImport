@@ -168,6 +168,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
             static void impl()
             {
+                // Resolve the test source relative to the test assembly's output directory.
                 var sourcePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../AppTests.cs"));
                 var sourceCode = File.ReadAllText(sourcePath);
 
@@ -350,6 +351,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 }
 
 
+// TODO: Move these syntax fixtures into a separate source file.
 #region ////////  Test Type Declarations  ////////
 #if true && !false
 #pragma warning disable CS1591 // Public declarations are syntax fixtures for visibility rewriting.
