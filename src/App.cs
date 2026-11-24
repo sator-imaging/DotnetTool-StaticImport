@@ -37,7 +37,7 @@ public class App
 
     /*  command line args  ================================================================ */
 
-    static readonly Option<string[]> opt_inputFilePaths = new("-i", "--input-files")
+    static readonly Option<string[]> opt_inputFilePaths = new("-i", aliases: new[] { "--input-files" })
     {
         Description = $"""
             Input file paths or urls ({SR.HttpsSchemeFull}... or {SR.GitHubSchemeFull}user@repo/<REF>/path/to/file.ext)
@@ -48,7 +48,7 @@ public class App
         AllowMultipleArgumentsPerToken = true,
     };
 
-    static readonly Option<string> opt_outputPath = new("-o", "--output-path")
+    static readonly Option<string> opt_outputPath = new("-o", aliases: new[] { "--output-path" })
     {
         Description = """
             Output folder or file path
@@ -56,12 +56,12 @@ public class App
             """,
     };
 
-    static readonly Option<string> opt_outputFilePrefix = new("-op", "--output-prefix")
+    static readonly Option<string> opt_outputFilePrefix = new("-op", aliases: new[] { "--output-prefix" })
     {
         Description = "Output file prefix used when output path is set to folder",
     };
 
-    static readonly Option<bool> opt_forceOverwrite = new("-f", "--force-overwrite")
+    static readonly Option<bool> opt_forceOverwrite = new("-f", aliases: new[] { "--force-overwrite" })
     {
         Description = """
             Overwrite file without confirmation
@@ -148,7 +148,7 @@ public class App
 
         Console.IsSilentMode = options.GetValue(opt_silent);
 
-        var timeout = options.GetValue(opt_timeout);
+        int timeout = options.GetValue(opt_timeout);
         if (timeout <= 0)
         {
             // value is 0 if flag is omitted.

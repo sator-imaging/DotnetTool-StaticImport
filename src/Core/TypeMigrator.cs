@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core;
@@ -19,6 +18,21 @@ internal class TypeMigrator : IContentTransformer
 
     private readonly string? _newNamespace;
     private readonly bool _makeTypeInternal;
+
+    static bool HasAncestor<TNode>(SyntaxNode node) where TNode : SyntaxNode
+    {
+        bool found = false;
+        foreach (var ancestor in node.Ancestors())
+        {
+            if (ancestor is TNode)
+            {
+                found = true;
+                break;
+            }
+        }
+
+        return found;
+    }
 
     public TypeMigrator(string? newNamespace, bool makeTypeInternal)
     {
@@ -121,12 +135,21 @@ internal class TypeMigrator : IContentTransformer
         BaseTypeDeclarationSyntax? Visit(BaseTypeDeclarationSyntax node)
         {
             // don't change nested type visibility!!
-            if (node.Ancestors().OfType<BaseTypeDeclarationSyntax>().Any())
+            if (HasAncestor<BaseTypeDeclarationSyntax>(node))
             {
                 return null;
             }
 
-            var targetModifier = node.Modifiers.FirstOrDefault(m => m.IsKind(targetVisibility));
+            SyntaxToken targetModifier = default;
+            foreach (var modifier in node.Modifiers)
+            {
+                if (modifier.IsKind(targetVisibility))
+                {
+                    targetModifier = modifier;
+                    break;
+                }
+            }
+
             if (targetModifier == default)
             {
                 return null;
@@ -161,7 +184,7 @@ internal class TypeMigrator : IContentTransformer
         public override SyntaxNode? VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
         {
             // ignore nested declaration
-            if (node.Ancestors().OfType<NamespaceDeclarationSyntax>().Any())
+            if (HasAncestor<NamespaceDeclarationSyntax>(node))
             {
                 return base.VisitNamespaceDeclaration(node);
             }

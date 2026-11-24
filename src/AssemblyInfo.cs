@@ -1,3 +1,6 @@
+// Licensed under the MIT License
+// https://github.com/sator-imaging/DotnetTool-StaticImport
+
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 

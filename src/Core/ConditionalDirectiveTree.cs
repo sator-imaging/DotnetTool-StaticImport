@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+// Allow linq operation [Directive tree analysis is not on a performance-critical path.]
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -158,6 +159,7 @@ public class ConditionalDirectiveTree
         // --> treat element index as bit position to build all possible combinations.
         static void impl(Node tipNode, List<List<string>> result)
         {
+            const int BitMask = 1;
             var symbolList = new List<string>(SR.DefaultListCapacity);
             {
                 var node = tipNode;
@@ -194,7 +196,7 @@ public class ConditionalDirectiveTree
 
                 for (int bitPosition = 0; bitPosition < symbolsSpan.Length; bitPosition++)
                 {
-                    if (((i >> bitPosition) & 1) == 1)
+                    if (((i >> bitPosition) & BitMask) != 0)
                     {
                         list.Add(symbolsSpan[bitPosition]);
                     }
