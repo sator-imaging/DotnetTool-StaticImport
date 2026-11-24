@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-// Allow linq operation [Directive tree analysis is not on a performance-critical path.]
+// Allow linq operation: TODO: eliminate LINQ ops
 using System.Linq;
 using System.Runtime.InteropServices;
 
