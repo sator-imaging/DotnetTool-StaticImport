@@ -5,9 +5,14 @@ using System;
 using System.CommandLine;
 using System.Threading;
 using System.Threading.Tasks;
+using SatorImaging.DotnetTool.StaticImport.Core;
+using Console = SatorImaging.DotnetTool.StaticImport.Core.Console;
 
-namespace SatorImaging.DotnetTool.StaticImport.Core;
+namespace SatorImaging.DotnetTool.StaticImport;
 
+/// <summary>
+/// Entry point for the static import command-line tool.
+/// </summary>
 public class App
 {
     static async Task<int> Main(string[] args)
@@ -22,15 +27,6 @@ public class App
                 EnablePosixBundling = true,
             });
 
-            // hehe: force run tests!
-#if DEBUG
-            if (options.GetValue(opt_TEST))
-            {
-                App_Tests.RunAllTests();
-                return SR.Result.Succeeded;
-            }
-#endif
-
             return await options.InvokeAsync();
         }
         catch (Exception error)
@@ -44,7 +40,7 @@ public class App
 
     /*  command line args  ================================================================ */
 
-    static readonly Option<string[]> opt_inputFilePaths = new("-i", "--input-files")
+    static readonly Option<string[]> opt_inputFilePaths = new("-i", aliases: new[] { "--input-files" })
     {
         Description = $"""
             Input file paths or urls ({SR.HttpsSchemeFull}... or {SR.GitHubSchemeFull}user@repo/<REF>/path/to/file.ext)
@@ -55,7 +51,7 @@ public class App
         AllowMultipleArgumentsPerToken = true,
     };
 
-    static readonly Option<string> opt_outputPath = new("-o", "--output-path")
+    static readonly Option<string> opt_outputPath = new("-o", aliases: new[] { "--output-path" })
     {
         Description = """
             Output folder or file path
@@ -63,12 +59,12 @@ public class App
             """,
     };
 
-    static readonly Option<string> opt_outputFilePrefix = new("-op", "--output-prefix")
+    static readonly Option<string> opt_outputFilePrefix = new("-op", aliases: new[] { "--output-prefix" })
     {
         Description = "Output file prefix used when output path is set to folder",
     };
 
-    static readonly Option<bool> opt_forceOverwrite = new("-f", "--force-overwrite")
+    static readonly Option<bool> opt_forceOverwrite = new("-f", aliases: new[] { "--force-overwrite" })
     {
         Description = """
             Overwrite file without confirmation
@@ -99,14 +95,6 @@ public class App
         Description = "Suppress verbose logging",
     };
 
-#if DEBUG
-    static readonly Option<bool> opt_TEST = new("--TEST")
-    {
-        Description = "Run tests! (available only if DEBUG symbol is defined)",
-    };
-#endif
-
-
     /* =====  don't forget to update!  ===== */
 
     static RootCommand GetRootCommand()
@@ -118,9 +106,6 @@ public class App
         int i = 0;
 
         // need to insert to reorder...!!
-#if DEBUG
-        cmd.Options.Insert(i++, opt_TEST);
-#endif
         cmd.Options.Insert(i++, opt_inputFilePaths);
         cmd.Options.Insert(i++, opt_outputPath);
         cmd.Options.Insert(i++, opt_outputFilePrefix);
@@ -166,7 +151,7 @@ public class App
 
         Console.IsSilentMode = options.GetValue(opt_silent);
 
-        var timeout = options.GetValue(opt_timeout);
+        int timeout = options.GetValue(opt_timeout);
         if (timeout <= 0)
         {
             // value is 0 if flag is omitted.

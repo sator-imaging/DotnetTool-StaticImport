@@ -66,7 +66,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
             CONSOLE.Write($"{message.TrimEnd()} ");
 
-            var startAt = Stopwatch.GetTimestamp();
+            long startAt = Stopwatch.GetTimestamp();
 
             while (!CONSOLE.KeyAvailable)
             {
@@ -102,6 +102,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
         static readonly Lazy<HTTP_CLIENT> cache_client = new(() =>
         {
+            // Don't dispose: This client is shared for the lifetime of the process
             var client = new HTTP_CLIENT();
 
             client.DefaultRequestHeaders.UserAgent.Clear();

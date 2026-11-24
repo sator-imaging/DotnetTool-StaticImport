@@ -19,12 +19,18 @@ on:
   #      default: true
   #      required: false
 
+permissions:
+  contents: read
+
 env:
   push_source: 'SatorImaging.DotnetTool.StaticImport/bin/Release/*.nupkg'
-  test_project: '--project SatorImaging.DotnetTool.StaticImport'
 
 jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
   nuget:
+    needs: test
 
     permissions:
       id-token: write  # enable GitHub OIDC token issuance for this job
@@ -48,11 +54,6 @@ jobs:
       run: |
         #cd src
         dotnet restore
-    
-    # TODO
-    #- run: dotnet run -f net8.0 ${{ env.test_project }} -- --TEST
-    #- run: dotnet run -f net9.0 ${{ env.test_project }} -- --TEST
-    - run: dotnet run -f net10.0 ${{ env.test_project }} -- --TEST
     
     - name: Pack
       run: |

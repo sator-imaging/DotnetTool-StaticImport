@@ -1,14 +1,13 @@
 // Licensed under the MIT License
 // https://github.com/sator-imaging/DotnetTool-StaticImport
 
-#if DEBUG
+#if DEBUG || !DEBUG || true // DO NOT remove! this directive is a part of the test!!
 
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +15,7 @@ using System.Threading.Tasks;
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
     // hehe
-    internal static class App_Tests
+    internal class AppTests
     {
         // A dummy provider for a custom scheme
         private class DummyProvider : IFileProvider
@@ -26,7 +25,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             public string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix) => "dummy_path";
         }
 
-        public static void RunAllTests()
+        [Test]
+        public void RunAllTests()
         {
             FileProviderRegistrationTest();
             FileProviderTest();
@@ -166,12 +166,11 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         {
             impl();
 
-            static void impl([CallerFilePath] string? thisScriptFilePath = null)
+            static void impl()
             {
-                if (string.IsNullOrWhiteSpace(thisScriptFilePath))
-                    return;
-
-                var sourceCode = File.ReadAllText(thisScriptFilePath);
+                // Resolve the test source relative to the test assembly's output directory.
+                var sourcePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../AppTests.cs"));
+                var sourceCode = File.ReadAllText(sourcePath);
 
                 var rootNode = ConditionalDirectiveTree.Parse(sourceCode);
 
@@ -352,8 +351,10 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 }
 
 
+// TODO: Move these syntax fixtures into a separate source file.
 #region ////////  Test Type Declarations  ////////
 #if true && !false
+#pragma warning disable CS1591 // Public declarations are syntax fixtures for visibility rewriting.
 
 //// NOTE: expected exception is thrown if directive is found that is always false.
 //#if false == true
@@ -463,6 +464,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
     }
 }
 
+#pragma warning restore CS1591
 #endif
 #endregion
 

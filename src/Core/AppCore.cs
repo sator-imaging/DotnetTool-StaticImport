@@ -40,10 +40,11 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         {
             bool isCSharpScriptMode = makeTypeInternal || newNamespace != null;
 
+            const int SingleInputCount = 1;
             bool isOutputDirectory = Directory.Exists(outputDirOrFilePath);
             if (!isOutputDirectory)
             {
-                if (inputUrlOrFilePaths.Length > 1)
+                if (inputUrlOrFilePaths.Length > SingleInputCount)
                 {
                     Console.WriteError($"output file is specified for multiple inputs: {outputDirOrFilePath}");
                     return SR.Result.ErrorUncategorized;
@@ -123,7 +124,9 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 bool applyCSharpScriptFilter = isCSharpScriptMode && IsCSharpScriptFile(outputPath);
                 if (applyCSharpScriptFilter)
                 {
-                    await Task.Run(async () =>
+                    await Task.Run(
+                        // Allow allocation [This task captures request-specific data for its asynchronous work.]
+                        async () =>
                     {
                         Console.WriteLine(); // spacer
                         var transformedBytes = typeMigrator.Transform(contentBytes);

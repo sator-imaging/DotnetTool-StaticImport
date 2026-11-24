@@ -144,7 +144,7 @@ internal class GitHubFileProvider : IFileProvider
         var (userName, repoName, REF, filePath) = ParseUrl(uri);
         var apiUrl = BuildApiUrl(userName, repoName, REF, filePath).ToString();
 
-        var res = await SendRequestAsync(HttpMethod.Head, apiUrl, ct);
+        using var res = await SendRequestAsync(HttpMethod.Head, apiUrl, ct);
 
         if (res == null || !res.IsSuccessStatusCode)
         {
@@ -160,7 +160,7 @@ internal class GitHubFileProvider : IFileProvider
         var (userName, repoName, REF, filePath) = ParseUrl(uri);
         var contentUrl = BuildContentUrl(userName, repoName, REF, filePath).ToString();
 
-        var res = await SendRequestAsync(HttpMethod.Get, contentUrl, ct);
+        using var res = await SendRequestAsync(HttpMethod.Get, contentUrl, ct);
 
         if (res == null || !res.IsSuccessStatusCode)
         {
