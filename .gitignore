@@ -1,5 +1,20 @@
-﻿.vs
-**/bin
-**/obj
+﻿/*
+.*
+bin
+obj
 
-**.psd
+!.github
+!src
+!tests
+
+!.gitignore
+!.editorconfig
+!Directory.Build.*
+!*.slnx
+!icon*.png
+
+*.md
+!AGENTS.md
+!CHANGELOG.md
+!LICENSE.md
+!README*.md
