@@ -1,6 +1,8 @@
 // Licensed under the MIT License
 // https://github.com/sator-imaging/DotnetTool-StaticImport
 
+#if DEBUG || !DEBUG || true
+
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Diagnostics;
@@ -461,3 +463,5 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
 #endif
 #endregion
+
+#endif
