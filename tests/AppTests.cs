@@ -31,6 +31,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             FileProviderRegistrationTest();
             FileProviderTest();
             SymbolCombinationTest();
+            ReferencedPreprocessorSymbolsTest();
             ParseComplexDirectiveTreeTest();
             TypeMigratorTest();
             RewriterTest();
@@ -159,6 +160,21 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             if (combo.Count != expected)
             {
                 throw new Exception($"[FAILED] {nameof(SymbolCombinationTest)}: expected count is {expected} but was {combo.Count}");
+            }
+        }
+
+        static void ReferencedPreprocessorSymbolsTest()
+        {
+            var syntaxTree = CSharpSyntaxTree.ParseText("""
+                #if ZED && ALPHA
+                #elif BETA || ALPHA
+                #endif
+                """);
+
+            var symbols = ConditionalDirectiveTree.GetReferencedPreprocessorSymbols(syntaxTree);
+            if (!symbols.SequenceEqual(new[] { "ALPHA", "BETA", "ZED" }))
+            {
+                throw new Exception($"[FAILED] {nameof(ReferencedPreprocessorSymbolsTest)}: unexpected symbols: {string.Join(", ", symbols)}");
             }
         }
 
