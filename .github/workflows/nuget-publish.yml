@@ -21,7 +21,6 @@ on:
 
 env:
   push_source: 'SatorImaging.DotnetTool.StaticImport/bin/Release/*.nupkg'
-  test_project: '--project SatorImaging.DotnetTool.StaticImport'
 
 jobs:
   nuget:
@@ -49,10 +48,7 @@ jobs:
         #cd src
         dotnet restore
     
-    # TODO
-    #- run: dotnet run -f net8.0 ${{ env.test_project }} -- --TEST
-    #- run: dotnet run -f net9.0 ${{ env.test_project }} -- --TEST
-    - run: dotnet run -f net10.0 ${{ env.test_project }} -- --TEST
+    - run: dotnet test tests/SatorImaging.DotnetTool.StaticImport.Tests.csproj
     
     - name: Pack
       run: |

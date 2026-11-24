@@ -5,8 +5,10 @@ using System;
 using System.CommandLine;
 using System.Threading;
 using System.Threading.Tasks;
+using SatorImaging.DotnetTool.StaticImport.Core;
+using Console = SatorImaging.DotnetTool.StaticImport.Core.Console;
 
-namespace SatorImaging.DotnetTool.StaticImport.Core;
+namespace SatorImaging.DotnetTool.StaticImport;
 
 public class App
 {
@@ -21,15 +23,6 @@ public class App
             {
                 EnablePosixBundling = true,
             });
-
-            // hehe: force run tests!
-#if DEBUG
-            if (options.GetValue(opt_TEST))
-            {
-                App_Tests.RunAllTests();
-                return SR.Result.Succeeded;
-            }
-#endif
 
             return await options.InvokeAsync();
         }
@@ -99,14 +92,6 @@ public class App
         Description = "Suppress verbose logging",
     };
 
-#if DEBUG
-    static readonly Option<bool> opt_TEST = new("--TEST")
-    {
-        Description = "Run tests! (available only if DEBUG symbol is defined)",
-    };
-#endif
-
-
     /* =====  don't forget to update!  ===== */
 
     static RootCommand GetRootCommand()
@@ -118,9 +103,6 @@ public class App
         int i = 0;
 
         // need to insert to reorder...!!
-#if DEBUG
-        cmd.Options.Insert(i++, opt_TEST);
-#endif
         cmd.Options.Insert(i++, opt_inputFilePaths);
         cmd.Options.Insert(i++, opt_outputPath);
         cmd.Options.Insert(i++, opt_outputFilePrefix);

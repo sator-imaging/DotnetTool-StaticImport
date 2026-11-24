@@ -1,14 +1,11 @@
 // Licensed under the MIT License
 // https://github.com/sator-imaging/DotnetTool-StaticImport
 
-#if DEBUG
-
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +13,7 @@ using System.Threading.Tasks;
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
     // hehe
-    internal static class App_Tests
+    internal class App_Tests
     {
         // A dummy provider for a custom scheme
         private class DummyProvider : IFileProvider
@@ -26,7 +23,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             public string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix) => "dummy_path";
         }
 
-        public static void RunAllTests()
+        [Test]
+        public void RunAllTests()
         {
             FileProviderRegistrationTest();
             FileProviderTest();
@@ -166,12 +164,10 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         {
             impl();
 
-            static void impl([CallerFilePath] string? thisScriptFilePath = null)
+            static void impl()
             {
-                if (string.IsNullOrWhiteSpace(thisScriptFilePath))
-                    return;
-
-                var sourceCode = File.ReadAllText(thisScriptFilePath);
+                // The source file is copied beside the test assembly for this parser check.
+                var sourceCode = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "App_Tests.cs"));
 
                 var rootNode = ConditionalDirectiveTree.Parse(sourceCode);
 
@@ -465,5 +461,3 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
 #endif
 #endregion
-
-#endif

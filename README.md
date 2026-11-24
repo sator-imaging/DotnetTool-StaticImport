@@ -50,7 +50,7 @@ static-import -o "." -i \
 
 > Type `static-import --help` for more options.
 
-For the use in GitHub Actions, see [.github/workflows/tests.yml](.github/workflows/tests.yml) for details.
+For the use in GitHub Actions, see [.github/workflows/test.yml](.github/workflows/test.yml) for details.
 
 > [!IMPORTANT]
 > In GitHub actions, `actions/checkout` or `git pull` won't restore commit date for downloaded files so that `-f/--force-overwrite` option is required to migrate files from other repos.
