@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core;
 
-internal class ConditionalDirectiveTree
+public class ConditionalDirectiveTree
 {
     public sealed class Node
     {
@@ -133,7 +133,7 @@ internal class ConditionalDirectiveTree
 
         Debug.Assert(result.First().Count == 0);
         Debug.Assert(result.Skip(1).All(x => x.Count != 0));
-        Debug.Assert(result.Count == result.Distinct(new UnorderedListStringComparer()).Count());
+        Debug.Assert(result.Count == result.Distinct(UnorderedListStringComparer.Default).Count());
 
         return result;
 
@@ -183,7 +183,7 @@ internal class ConditionalDirectiveTree
             }
 
             var symbolsSpan = CollectionsMarshal.AsSpan(symbolList);
-            var unorderedComparer = new UnorderedListStringComparer();
+            var unorderedComparer = UnorderedListStringComparer.Default;
 
             int comboCount = (int)Math.Pow(2, symbolsSpan.Length);
             result.Capacity = result.Count + (comboCount - 1);
@@ -209,8 +209,12 @@ internal class ConditionalDirectiveTree
     }
 
 
-    readonly struct UnorderedListStringComparer : IEqualityComparer<List<string>>
+    sealed class UnorderedListStringComparer : IEqualityComparer<List<string>>
     {
+        public static readonly UnorderedListStringComparer Default = new();
+
+        private UnorderedListStringComparer() { }
+
         public int GetHashCode([DisallowNull] List<string> obj) => obj.Sum(x => x.Length);
 
         public bool Equals(List<string>? left, List<string>? right)
