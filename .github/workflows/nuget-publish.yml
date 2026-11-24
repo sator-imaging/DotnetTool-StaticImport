@@ -19,6 +19,9 @@ on:
   #      default: true
   #      required: false
 
+permissions:
+  contents: read
+
 env:
   push_source: 'SatorImaging.DotnetTool.StaticImport/bin/Release/*.nupkg'
 
