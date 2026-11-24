@@ -10,6 +10,9 @@ using Console = SatorImaging.DotnetTool.StaticImport.Core.Console;
 
 namespace SatorImaging.DotnetTool.StaticImport;
 
+/// <summary>
+/// Entry point for the static import command-line tool.
+/// </summary>
 public class App
 {
     static async Task<int> Main(string[] args)

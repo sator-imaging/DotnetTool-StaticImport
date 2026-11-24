@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
     // hehe
-    internal class App_Tests
+    internal class AppTests
     {
         // A dummy provider for a custom scheme
         private class DummyProvider : IFileProvider
@@ -168,8 +168,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
             static void impl()
             {
-                // The source file is copied beside the test assembly for this parser check.
-                var sourceCode = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "App_Tests.cs"));
+                var sourcePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../AppTests.cs"));
+                var sourceCode = File.ReadAllText(sourcePath);
 
                 var rootNode = ConditionalDirectiveTree.Parse(sourceCode);
 
@@ -351,6 +351,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
 
 #region ////////  Test Type Declarations  ////////
+#pragma warning disable CS1591 // Public declarations are syntax fixtures for visibility rewriting.
 #if true && !false
 
 //// NOTE: expected exception is thrown if directive is found that is always false.
@@ -463,5 +464,6 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 
 #endif
 #endregion
+#pragma warning restore CS1591
 
 #endif

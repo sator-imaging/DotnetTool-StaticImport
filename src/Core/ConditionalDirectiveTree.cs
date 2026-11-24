@@ -14,15 +14,34 @@ using System.Runtime.InteropServices;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core;
 
+/// <summary>
+/// Parses conditional compilation directives and builds their symbol combinations.
+/// </summary>
 public class ConditionalDirectiveTree
 {
+    /// <summary>
+    /// A node in a parsed conditional directive tree.
+    /// </summary>
     public sealed class Node
     {
+        /// <summary>
+        /// The parent node, or <see langword="null"/> for the root.
+        /// </summary>
         public Node? Parent;
+
+        /// <summary>
+        /// The child nodes in directive order.
+        /// </summary>
         public readonly List<Node> Children = new(SR.DefaultListCapacity);
 
+        /// <summary>
+        /// The preprocessor symbols associated with this node.
+        /// </summary>
         public readonly List<string> Symbols = new(SR.DefaultListCapacity);
 
+        /// <summary>
+        /// Returns a string representation of this node and its ancestors.
+        /// </summary>
         public override string ToString()
         {
             if (Parent == null)
@@ -34,6 +53,10 @@ public class ConditionalDirectiveTree
             return $"{string.Join(",", Symbols)} --> {Parent}";
         }
 
+        /// <summary>
+        /// Builds all non-empty symbol combinations represented by this root node.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">This node is not the root.</exception>
         public List<List<string>> ToSymbolCombinations()
         {
             if (Parent != null)
@@ -45,6 +68,11 @@ public class ConditionalDirectiveTree
 
 
     // TODO: return ConditionalDirectiveTree instance that has access to root node of parsed result.
+    /// <summary>
+    /// Parses conditional compilation directives from C# source code.
+    /// </summary>
+    /// <param name="sourceCode">The source code to parse.</param>
+    /// <returns>The root node of the parsed directive tree.</returns>
     public static Node Parse(string sourceCode)
     {
         var tree = CSharpSyntaxTree.ParseText(sourceCode);
