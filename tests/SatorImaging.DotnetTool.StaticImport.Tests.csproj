@@ -11,7 +11,6 @@
   <ItemGroup>
     <PackageReference Include="TUnit" Version="1.46.0" />
     <ProjectReference Include="../src/SatorImaging.DotnetTool.StaticImport.csproj" />
-    <None Include="App_Tests.cs" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
