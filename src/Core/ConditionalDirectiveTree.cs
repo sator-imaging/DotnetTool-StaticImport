@@ -18,6 +18,17 @@ namespace SatorImaging.DotnetTool.StaticImport.Core;
 public class ConditionalDirectiveTree
 {
     /// <summary>
+    /// The root node of the parsed directive tree.
+    /// </summary>
+    public Node Root { get; }
+
+    ConditionalDirectiveTree(Node root)
+    {
+        Root = root;
+    }
+
+
+    /// <summary>
     /// A node in a parsed conditional directive tree.
     /// </summary>
     public sealed class Node
@@ -65,13 +76,12 @@ public class ConditionalDirectiveTree
     }
 
 
-    // TODO: return ConditionalDirectiveTree instance that has access to root node of parsed result.
     /// <summary>
     /// Parses conditional compilation directives from C# source code.
     /// </summary>
     /// <param name="sourceCode">The source code to parse.</param>
-    /// <returns>The root node of the parsed directive tree.</returns>
-    public static Node Parse(string sourceCode)
+    /// <returns>A conditional directive tree containing the parsed root node.</returns>
+    public static ConditionalDirectiveTree Parse(string sourceCode)
     {
         var tree = CSharpSyntaxTree.ParseText(sourceCode);
         var root = tree.GetRoot();
@@ -151,7 +161,7 @@ public class ConditionalDirectiveTree
             }
         }
 
-        return rootNode;
+        return new ConditionalDirectiveTree(rootNode);
     }
 
 

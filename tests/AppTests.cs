@@ -131,7 +131,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 // must be parsed as empty node
                 #if true
                 #endif
-                """);
+                """).Root;
 
             if (rootNode.Children.Last().Symbols.Count != 0)
             {
@@ -188,7 +188,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 var sourcePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../AppTests.cs"));
                 var sourceCode = File.ReadAllText(sourcePath);
 
-                var rootNode = ConditionalDirectiveTree.Parse(sourceCode);
+                var rootNode = ConditionalDirectiveTree.Parse(sourceCode).Root;
 
                 DumpDirectiveTreeInfo(rootNode);
             }
