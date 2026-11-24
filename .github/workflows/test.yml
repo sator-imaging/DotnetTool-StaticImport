@@ -23,4 +23,4 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Test
-        run: dotnet run --project tests -p:Building=true
+        run: dotnet run --project tests
