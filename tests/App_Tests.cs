@@ -1,7 +1,7 @@
 // Licensed under the MIT License
 // https://github.com/sator-imaging/DotnetTool-StaticImport
 
-#if DEBUG || !DEBUG || true
+#if DEBUG || !DEBUG || true // DO NOT remove! this directive is a part of the test!!
 
 using Microsoft.CodeAnalysis.CSharp;
 using System;
