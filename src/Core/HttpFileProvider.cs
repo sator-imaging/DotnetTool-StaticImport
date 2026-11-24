@@ -32,7 +32,7 @@ internal class HttpFileProvider : IFileProvider
         {
             var client = HttpClient.Shared;
             using var req = new HttpRequestMessage(HttpMethod.Head, uri);
-            var res = await client.SendAsync(req, ct);
+            using var res = await client.SendAsync(req, ct);
 
             if (!res.IsSuccessStatusCode)
             {
@@ -60,7 +60,7 @@ internal class HttpFileProvider : IFileProvider
         try
         {
             var client = HttpClient.Shared;
-            var GET = await client.GetAsync(uri, ct);
+            using var GET = await client.GetAsync(uri, ct);
             if (!GET.IsSuccessStatusCode)
             {
                 Console.WriteWarning($"{GET}");
