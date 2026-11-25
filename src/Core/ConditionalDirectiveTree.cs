@@ -185,7 +185,7 @@ public class ConditionalDirectiveTree
 
         /* =====  impl  ===== */
 
-        void visit(Node node)
+        static void visit(Node node, List<List<string>> result, HashSet<List<string>> combinations)
         {
             // all possible symbol combinations can be built from tip node.
             if (node.Children.Count == 0)
