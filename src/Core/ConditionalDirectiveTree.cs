@@ -46,7 +46,7 @@ public class ConditionalDirectiveTree
         /// <summary>
         /// The preprocessor symbols associated with this node.
         /// </summary>
-        public readonly List<string> Symbols = new([SR.DefaultListCapacity);](capacity: 0); // 0 (cached) -> 4 -> 8)
+        public readonly List<string> Symbols = new(capacity: 0); // 0 (cached) -> 4 -> 8
 
         /// <summary>
         /// Returns a string representation of this node and its ancestors.
