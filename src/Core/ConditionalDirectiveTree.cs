@@ -174,7 +174,6 @@ public class ConditionalDirectiveTree
             result[0],
         };
 
-        // all possible symbol combinations can be built from tip node.
         visit(rootNode);
 
         Debug.Assert(result[0].Count == 0);
@@ -188,6 +187,7 @@ public class ConditionalDirectiveTree
 
         void visit(Node node)
         {
+            // all possible symbol combinations can be built from tip node.
             if (node.Children.Count == 0)
             {
                 impl(node, result, combinations);
