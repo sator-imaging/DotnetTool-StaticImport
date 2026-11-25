@@ -8,8 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-// Allow linq operation: TODO: eliminate LINQ ops
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core;
@@ -19,6 +17,17 @@ namespace SatorImaging.DotnetTool.StaticImport.Core;
 /// </summary>
 public class ConditionalDirectiveTree
 {
+    /// <summary>
+    /// The root node of the parsed directive tree.
+    /// </summary>
+    public Node Root { get; }
+
+    ConditionalDirectiveTree(Node root)
+    {
+        Root = root;
+    }
+
+
     /// <summary>
     /// A node in a parsed conditional directive tree.
     /// </summary>
@@ -32,12 +41,12 @@ public class ConditionalDirectiveTree
         /// <summary>
         /// The child nodes in directive order.
         /// </summary>
-        public readonly List<Node> Children = new(SR.DefaultListCapacity);
+        public readonly List<Node> Children = new(capacity: 0); // 0 (cached) -> 4 -> 8
 
         /// <summary>
         /// The preprocessor symbols associated with this node.
         /// </summary>
-        public readonly List<string> Symbols = new(SR.DefaultListCapacity);
+        public readonly List<string> Symbols = new(capacity: 0); // 0 (cached) -> 4 -> 8
 
         /// <summary>
         /// Returns a string representation of this node and its ancestors.
@@ -67,35 +76,40 @@ public class ConditionalDirectiveTree
     }
 
 
-    // TODO: return ConditionalDirectiveTree instance that has access to root node of parsed result.
     /// <summary>
     /// Parses conditional compilation directives from C# source code.
     /// </summary>
     /// <param name="sourceCode">The source code to parse.</param>
-    /// <returns>The root node of the parsed directive tree.</returns>
-    public static Node Parse(string sourceCode)
+    /// <returns>A conditional directive tree containing the parsed root node.</returns>
+    public static ConditionalDirectiveTree Parse(string sourceCode)
     {
         var tree = CSharpSyntaxTree.ParseText(sourceCode);
         var root = tree.GetRoot();
 
-        var directiveSyntaxes =
-            root.DescendantTrivia()
-                .Select(x => x.GetStructure() as DirectiveTriviaSyntax)
-                .Where(x => x != null)
-                .Cast<DirectiveTriviaSyntax>()
-                ;
-
         var rootNode = new Node();
         var parentStack = new Stack<Node>();
 
-        foreach (var directiveStx in directiveSyntaxes)
+        foreach (var trivia in root.DescendantTrivia())
         {
+            if (trivia.GetStructure() is not DirectiveTriviaSyntax directiveStx)
+                continue;
+
             if (directiveStx.Kind() is SyntaxKind.IfDirectiveTrivia or SyntaxKind.ElifDirectiveTrivia)
             {
                 if (directiveStx is ConditionalDirectiveTriviaSyntax conditionalStx &&
                     !conditionalStx.ConditionValue)
                 {
-                    if (!directiveStx.DescendantNodesAndSelf().OfType<IdentifierNameSyntax>().Any())
+                    var hasIdentifier = false;
+                    foreach (var syntax in directiveStx.DescendantNodesAndSelf())
+                    {
+                        if (syntax is IdentifierNameSyntax)
+                        {
+                            hasIdentifier = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasIdentifier)
                     {
                         throw new Exception("There is a preprocessor directive which will have never been met: " + directiveStx);
                     }
@@ -115,12 +129,13 @@ public class ConditionalDirectiveTree
                     Parent = parent,
                 };
 
-                node.Symbols.AddRange(
-                    directiveStx.DescendantNodesAndSelf()
-                                .OfType<IdentifierNameSyntax>()
-                                .Select(x => x.Identifier.ValueText)
-                                //.Where(x => !string.IsNullOrWhiteSpace(x))
-                                );
+                foreach (var syntax in directiveStx.DescendantNodesAndSelf())
+                {
+                    if (syntax is IdentifierNameSyntax identifier)
+                    {
+                        node.Symbols.Add(identifier.Identifier.ValueText);
+                    }
+                }
 
                 if (node.Symbols.Count == 0)
                 {
@@ -146,46 +161,48 @@ public class ConditionalDirectiveTree
             }
         }
 
-        return rootNode;
+        return new ConditionalDirectiveTree(rootNode);
     }
 
 
     static List<List<string>> BuildSymbolCombinations(Node rootNode)
     {
-        var result = new List<List<string>>(collection: [[]]);  // always insert empty!
-
-        // all possible symbol combinations can be built from tip node.
-        foreach (var tip in flattenHierarchy(rootNode).Where(x => x.Children.Count == 0))
+        // NOTE: always insert an empty as the first item!!
+        var result = new List<List<string>>(collection: [[]]);
+        var combinations = new HashSet<List<string>>(UnorderedListStringComparer.Default)
         {
-            impl(tip, result);
-        }
+            result[0],
+        };
 
-        Debug.Assert(result.First().Count == 0);
-        Debug.Assert(result.Skip(1).All(x => x.Count != 0));
-        Debug.Assert(result.Count == result.Distinct(UnorderedListStringComparer.Default).Count());
+        visit(rootNode, result, combinations);
+
+        Debug.Assert(result[0].Count == 0);
+        Debug.Assert(System.Linq.Enumerable.All(System.Linq.Enumerable.Skip(result, 1), x => x.Count != 0));
+        Debug.Assert(result.Count == System.Linq.Enumerable.Count(System.Linq.Enumerable.Distinct(result, UnorderedListStringComparer.Default)));
 
         return result;
 
 
         /* =====  impl  ===== */
 
-        static IEnumerable<Node> flattenHierarchy(Node node)
+        static void visit(Node node, List<List<string>> result, HashSet<List<string>> combinations)
         {
-            yield return node;
-
+            // all possible symbol combinations can be built from tip node.
+            if (node.Children.Count == 0)
+            {
+                impl(node, result, combinations);
+                return;
+            }
             foreach (var child in node.Children)
             {
-                foreach (var x in flattenHierarchy(child))
-                {
-                    yield return x;
-                }
+                visit(child, result, combinations);
             }
         }
 
         // recall, max possible combinations of 8 elements is 256.
         // that is the same as combinations of bit flags, 0b_0000_0000 to 0b_1111_1111.
         // --> treat element index as bit position to build all possible combinations.
-        static void impl(Node tipNode, List<List<string>> result)
+        static void impl(Node tipNode, List<List<string>> result, HashSet<List<string>> combinations)
         {
             const int BitMask = 1;
             var symbolList = new List<string>(SR.DefaultListCapacity);
@@ -193,7 +210,13 @@ public class ConditionalDirectiveTree
                 var node = tipNode;
                 do
                 {
-                    symbolList.AddRange(node.Symbols.Except(symbolList));
+                    foreach (var symbol in node.Symbols)
+                    {
+                        if (!symbolList.Contains(symbol))
+                        {
+                            symbolList.Add(symbol);
+                        }
+                    }
                     node = node.Parent;
                 }
                 while (node != null);
@@ -213,7 +236,6 @@ public class ConditionalDirectiveTree
             }
 
             var symbolsSpan = CollectionsMarshal.AsSpan(symbolList);
-            var unorderedComparer = UnorderedListStringComparer.Default;
 
             int comboCount = (int)Math.Pow(2, symbolsSpan.Length);
             result.Capacity = result.Count + (comboCount - 1);
@@ -230,7 +252,7 @@ public class ConditionalDirectiveTree
                     }
                 }
 
-                if (!result.Contains(list, unorderedComparer))
+                if (combinations.Add(list))
                 {
                     result.Add(list);
                 }
@@ -245,7 +267,15 @@ public class ConditionalDirectiveTree
 
         private UnorderedListStringComparer() { }
 
-        public int GetHashCode([DisallowNull] List<string> obj) => obj.Sum(x => x.Length);
+        public int GetHashCode([DisallowNull] List<string> obj)
+        {
+            int hashCode = 0;
+            foreach (var item in obj)
+            {
+                hashCode += item.Length;
+            }
+            return hashCode;
+        }
 
         public bool Equals(List<string>? left, List<string>? right)
         {
@@ -278,15 +308,29 @@ public class ConditionalDirectiveTree
     internal static IEnumerable<string> GetReferencedPreprocessorSymbols(SyntaxTree syntaxTree)
     {
         // https://gist.github.com/terrajobst/5d7d48da5af0a4be891d381fd7b2e5ed
-        return syntaxTree.GetRoot()
-                         .DescendantTrivia()
-                         .Where(t => t.IsKind(SyntaxKind.IfDirectiveTrivia) ||
-                                     t.IsKind(SyntaxKind.ElifDirectiveTrivia))
-                         .Select(t => t.GetStructure())
-                         .Cast<ConditionalDirectiveTriviaSyntax>()
-                         .SelectMany(c => c.Condition.DescendantNodesAndSelf().OfType<IdentifierNameSyntax>())
-                         .Select(i => i.Identifier.ValueText)
-                         .Distinct()
-                         .OrderBy(i => i);
+        var symbols = new HashSet<string>();
+        foreach (var trivia in syntaxTree.GetRoot().DescendantTrivia())
+        {
+            if (!trivia.IsKind(SyntaxKind.IfDirectiveTrivia) &&
+                !trivia.IsKind(SyntaxKind.ElifDirectiveTrivia))
+            {
+                continue;
+            }
+
+            if (trivia.GetStructure() is not ConditionalDirectiveTriviaSyntax directive)
+                continue;
+
+            foreach (var syntax in directive.Condition.DescendantNodesAndSelf())
+            {
+                if (syntax is IdentifierNameSyntax identifier)
+                {
+                    symbols.Add(identifier.Identifier.ValueText);
+                }
+            }
+        }
+
+        var result = new List<string>(symbols);
+        result.Sort();
+        return result;
     }
 }

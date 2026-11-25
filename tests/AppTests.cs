@@ -31,6 +31,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             FileProviderRegistrationTest();
             FileProviderTest();
             SymbolCombinationTest();
+            ReferencedPreprocessorSymbolsTest();
             ParseComplexDirectiveTreeTest();
             TypeMigratorTest();
             RewriterTest();
@@ -130,7 +131,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 // must be parsed as empty node
                 #if true
                 #endif
-                """);
+                """).Root;
 
             if (rootNode.Children.Last().Symbols.Count != 0)
             {
@@ -162,6 +163,21 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             }
         }
 
+        static void ReferencedPreprocessorSymbolsTest()
+        {
+            var syntaxTree = CSharpSyntaxTree.ParseText("""
+                #if ZED && ALPHA
+                #elif BETA || ALPHA
+                #endif
+                """);
+
+            var symbols = ConditionalDirectiveTree.GetReferencedPreprocessorSymbols(syntaxTree);
+            if (!symbols.SequenceEqual(new[] { "ALPHA", "BETA", "ZED" }))
+            {
+                throw new Exception($"[FAILED] {nameof(ReferencedPreprocessorSymbolsTest)}: unexpected symbols: {string.Join(", ", symbols)}");
+            }
+        }
+
         static void ParseComplexDirectiveTreeTest()
         {
             impl();
@@ -169,10 +185,10 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             static void impl()
             {
                 // Resolve the test source relative to the test assembly's output directory.
-                var sourcePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../AppTests.cs"));
+                var sourcePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../SyntaxFixtures.cs"));
                 var sourceCode = File.ReadAllText(sourcePath);
 
-                var rootNode = ConditionalDirectiveTree.Parse(sourceCode);
+                var rootNode = ConditionalDirectiveTree.Parse(sourceCode).Root;
 
                 DumpDirectiveTreeInfo(rootNode);
             }
@@ -349,123 +365,4 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         }
     }
 }
-
-
-// TODO: Move these syntax fixtures into a separate source file.
-#region ////////  Test Type Declarations  ////////
-#if true && !false
-#pragma warning disable CS1591 // Public declarations are syntax fixtures for visibility rewriting.
-
-//// NOTE: expected exception is thrown if directive is found that is always false.
-//#if false == true
-//#elif true == false
-//#elif false
-//#endif
-
-#endif
-
-// same symbol must be removed from combinations.
-#if Z_MULTI_USE
-#endif
-
-#if Z_MULTI_USE
-#elif Z_MULTI_USE
-#if Z_MULTI_USE
-#endif
-#elif Z_MULTI_USE
-#endif
-
-#if DEBUG == true && NET == true
-
-namespace SatorImaging.DotnetTool.StaticImport.Core
-{
-    namespace NestedNamespaceMustBeUntouched
-    {
-        public class TestFile
-        {
-            public static void TestMethod() => _ = ConsoleKey.Enter;
-        }
-
-        public abstract partial class AbstractPartialClass { }
-        public abstract class AbstractClass { }
-        public partial class PartialClass { }
-        public static class StaticClass { }
-        public sealed class SealedClass { }
-        public sealed partial class SealedPartialClass { }
-
-        public struct Struct { }
-        public partial struct PartialStruct { }
-        public readonly struct ReadOnlyStruct { }
-        public readonly partial struct ReadOnlyPartialStruct { }
-    }
-}
-
-#if true == NESTED_DIRECTIVE_IS_NOT_SUPPORTED
-
-namespace HELLO
-{
-    public class WORLD
-    {
-        public class MakeMeInternal { }
-    }
-}
-
-#elif FOO == BAR || BAZ == QUX
-#if DEEP_NEST == !true
-#if DEEP_NEST_MORE == !true
-#if !(A != B && C != D && E)
-
-namespace DeepNestNamespace
-{
-    namespace DoNotTouchMe
-    {
-        public class ThisClassMustBeInternalIfRequested
-        {
-            public sealed class NestedClass
-            {
-                public static partial class DeepNest { }
-            }
-        }
-    }
-}
-
-#endif
-#endif
-#endif
-#endif
-
-#endif
-
-#if !NET == false
-
-namespace SatorImaging.DotnetTool.StaticImport.Core
-{
-    namespace OtherNestedNamespace
-    {
-        public interface ISomething { }
-
-#pragma warning disable IDE0079
-#pragma warning disable SMA0026 // Enum Obfuscation
-        public enum TheEnum
-        {
-            Default,
-            Value,
-        }
-#pragma warning restore SMA0026 // Enum Obfuscation
-#pragma warning restore IDE0079
-
-        public partial record PartialRecord { }
-        public sealed record SealedRecord { }
-        public record Record { }
-        public record struct RecordStruct { }
-        public partial record struct PartialRecordStruct { }
-        public readonly record struct ReadOnlyRecordStruct { }
-        public readonly partial record struct ReadOnlyPartialRecordStruct { }
-    }
-}
-
-#pragma warning restore CS1591
-#endif
-#endregion
-
 #endif
