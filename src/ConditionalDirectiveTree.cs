@@ -149,7 +149,7 @@ public static class ConditionalDirectiveTree
             }
         }
 
-        return new ConditionalDirectiveTree(rootNode);
+        return rootNode;
     }
 
     static List<List<string>> BuildSymbolCombinations(Node rootNode)
