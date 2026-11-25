@@ -41,12 +41,12 @@ public class ConditionalDirectiveTree
         /// <summary>
         /// The child nodes in directive order.
         /// </summary>
-        public readonly List<Node> Children = new(SR.DefaultListCapacity);
+        public readonly List<Node> Children = new(capacity: 0); // 0 (cached) -> 4 -> 8
 
         /// <summary>
         /// The preprocessor symbols associated with this node.
         /// </summary>
-        public readonly List<string> Symbols = new(SR.DefaultListCapacity);
+        public readonly List<string> Symbols = new([SR.DefaultListCapacity);](capacity: 0); // 0 (cached) -> 4 -> 8)
 
         /// <summary>
         /// Returns a string representation of this node and its ancestors.
