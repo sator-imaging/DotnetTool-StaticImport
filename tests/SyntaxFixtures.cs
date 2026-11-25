@@ -2,6 +2,7 @@
 // https://github.com/sator-imaging/DotnetTool-StaticImport
 
 #if DEBUG || !DEBUG || true // DO NOT remove! this directive is a part of the test!!
+
 #region ////////  Test Type Declarations  ////////
 #if true && !false
 #pragma warning disable CS1591 // Public declarations are syntax fixtures for visibility rewriting.
