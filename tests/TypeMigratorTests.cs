@@ -7,9 +7,9 @@ using System.Text;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
-    internal partial class AppTests
+    internal class TypeMigratorTests
     {
-        static void TypeMigratorTest()
+        internal static void TypeMigratorTest()
         {
             var sourceCode = """
                 namespace Foo.Bar.Baz
@@ -34,7 +34,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             _ = new TypeMigrator("PrefixMode.", true).Transform(sourceCodeBytes);
         }
 
-        static void RewriterTest()
+        internal static void RewriterTest()
         {
             var nestedNamespaces = """
                 namespace Root.Name.Space

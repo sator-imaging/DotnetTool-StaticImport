@@ -5,9 +5,9 @@ using System;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
-    internal partial class AppTests
+    internal class GitHubUrlBuilderTests
     {
-        static void GitHubUrlBuilderTest()
+        internal static void GitHubUrlBuilderTest()
         {
             foreach (var url in new string[]
             {

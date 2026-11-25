@@ -3,9 +3,9 @@
 
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
-    internal partial class AppTests
+    internal class ConsoleTests
     {
-        static void ReadKeyTest()
+        internal static void ReadKeyTest()
         {
             if (!Console.CanReadKey)
             {

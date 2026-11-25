@@ -6,20 +6,20 @@ using System;
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
     // hehe
-    internal partial class AppTests
+    internal class AppTests
     {
         [Test]
         public void RunAllTests()
         {
-            FileProviderRegistrationTest();
-            FileProviderTest();
-            SymbolCombinationTest();
-            ParseComplexDirectiveTreeTest();
-            TypeMigratorTest();
-            RewriterTest();
+            FileProviderTests.FileProviderRegistrationTest();
+            FileProviderTests.FileProviderTest();
+            ConditionalDirectiveTreeTests.SymbolCombinationTest();
+            ConditionalDirectiveTreeTests.ParseComplexDirectiveTreeTest();
+            TypeMigratorTests.TypeMigratorTest();
+            TypeMigratorTests.RewriterTest();
 
-            GitHubUrlBuilderTest();
-            ReadKeyTest();
+            GitHubUrlBuilderTests.GitHubUrlBuilderTest();
+            ConsoleTests.ReadKeyTest();
 
             Console.WriteImportantLine('\n' + @"  \\\ All tests were done ///" + '\n');
         }

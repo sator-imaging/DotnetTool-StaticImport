@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
-    internal partial class AppTests
+    internal class FileProviderTests
     {
         // A dummy provider for a custom scheme
         private class DummyProvider : IFileProvider
@@ -20,13 +20,13 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             public string GetOutputFilePath(Uri uri, string outputDirOrFilePath, string? outputFilePrefix) => "dummy_path";
         }
 
-        static void FileProviderRegistrationTest()
+        internal static void FileProviderRegistrationTest()
         {
             AppCore.RegisterFileProvider("dummy", new DummyProvider());
             Console.WriteImportantLine("\nFileProviderRegistrationTest was done\n");
         }
 
-        static void FileProviderTest()
+        internal static void FileProviderTest()
         {
             // Create a dummy file for testing
             const string testFilePath = "test.txt";
