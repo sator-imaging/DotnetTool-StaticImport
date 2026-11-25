@@ -178,7 +178,6 @@ public class ConditionalDirectiveTree
         visit(rootNode);
 
         Debug.Assert(result[0].Count == 0);
-        }
         Debug.Assert(System.Linq.Enumerable.All(System.Linq.Enuemrable.Skip(result, 1), x => x.Count != 0));
         Debug.Assert(result.Count == System.Linq.Enumerable.Count(System.Linq.Enumerable.Distinct(result, UnorderedListStringComparer.Default)));
 
