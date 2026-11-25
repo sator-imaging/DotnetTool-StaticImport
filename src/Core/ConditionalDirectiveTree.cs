@@ -195,7 +195,7 @@ public class ConditionalDirectiveTree
             }
             foreach (var child in node.Children)
             {
-                visit(child);
+                visit(child, result, combinations);
             }
         }
 
