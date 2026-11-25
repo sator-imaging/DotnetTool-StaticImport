@@ -167,7 +167,8 @@ public class ConditionalDirectiveTree
 
     static List<List<string>> BuildSymbolCombinations(Node rootNode)
     {
-        var result = new List<List<string>>(collection: [[]]);  // always insert empty!
+        // NOTE: always insert an empty as the first item!!
+        var result = new List<List<string>>(collection: [[]]);
         var combinations = new HashSet<List<string>>(UnorderedListStringComparer.Default)
         {
             result[0],
