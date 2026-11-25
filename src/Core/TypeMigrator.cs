@@ -63,7 +63,7 @@ internal class TypeMigrator : IContentTransformer
 
         // when preprocessor symbol is used in C# source code, all combinations must be enabled to process file correctly.
         // --> C# parser will skip creating syntax tree enclosed by directive that condition is not met.
-        foreach (var symbols in ConditionalDirectiveTree.Parse(content).Root.ToSymbolCombinations())
+        foreach (var symbols in ConditionalDirectiveTree.Parse(content).ToSymbolCombinations())
         {
             var options = symbols.Count == 0
                 ? CSharpParseOptions.Default

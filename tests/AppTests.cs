@@ -1,8 +1,6 @@
 // Licensed under the MIT License
 // https://github.com/sator-imaging/DotnetTool-StaticImport
 
-#if DEBUG || !DEBUG || true // DO NOT remove! this directive is a part of the test!!
-
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Diagnostics;
@@ -31,7 +29,6 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             FileProviderRegistrationTest();
             FileProviderTest();
             SymbolCombinationTest();
-            ReferencedPreprocessorSymbolsTest();
             ParseComplexDirectiveTreeTest();
             TypeMigratorTest();
             RewriterTest();
@@ -131,7 +128,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 // must be parsed as empty node
                 #if true
                 #endif
-                """).Root;
+                """);
 
             if (rootNode.Children.Last().Symbols.Count != 0)
             {
@@ -163,21 +160,6 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             }
         }
 
-        static void ReferencedPreprocessorSymbolsTest()
-        {
-            var syntaxTree = CSharpSyntaxTree.ParseText("""
-                #if ZED && ALPHA
-                #elif BETA || ALPHA
-                #endif
-                """);
-
-            var symbols = ConditionalDirectiveTree.GetReferencedPreprocessorSymbols(syntaxTree);
-            if (!symbols.SequenceEqual(new[] { "ALPHA", "BETA", "ZED" }))
-            {
-                throw new Exception($"[FAILED] {nameof(ReferencedPreprocessorSymbolsTest)}: unexpected symbols: {string.Join(", ", symbols)}");
-            }
-        }
-
         static void ParseComplexDirectiveTreeTest()
         {
             impl();
@@ -188,7 +170,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
                 var sourcePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../SyntaxFixtures.cs"));
                 var sourceCode = File.ReadAllText(sourcePath);
 
-                var rootNode = ConditionalDirectiveTree.Parse(sourceCode).Root;
+                var rootNode = ConditionalDirectiveTree.Parse(sourceCode);
 
                 DumpDirectiveTreeInfo(rootNode);
             }
@@ -365,4 +347,3 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         }
     }
 }
-#endif

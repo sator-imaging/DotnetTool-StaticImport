@@ -10,24 +10,13 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
-namespace SatorImaging.DotnetTool.StaticImport.Core;
+namespace SatorImaging.DotnetTool.StaticImport;
 
 /// <summary>
 /// Parses conditional compilation directives and builds their symbol combinations.
 /// </summary>
-public class ConditionalDirectiveTree
+public static class ConditionalDirectiveTree
 {
-    /// <summary>
-    /// The root node of the parsed directive tree.
-    /// </summary>
-    public Node Root { get; }
-
-    ConditionalDirectiveTree(Node root)
-    {
-        Root = root;
-    }
-
-
     /// <summary>
     /// A node in a parsed conditional directive tree.
     /// </summary>
@@ -75,13 +64,12 @@ public class ConditionalDirectiveTree
         }
     }
 
-
     /// <summary>
     /// Parses conditional compilation directives from C# source code.
     /// </summary>
     /// <param name="sourceCode">The source code to parse.</param>
-    /// <returns>A conditional directive tree containing the parsed root node.</returns>
-    public static ConditionalDirectiveTree Parse(string sourceCode)
+    /// <returns>Root node of parsed conditional directive tree.</returns>
+    public static Node Parse(string sourceCode)
     {
         var tree = CSharpSyntaxTree.ParseText(sourceCode);
         var root = tree.GetRoot();
@@ -163,7 +151,6 @@ public class ConditionalDirectiveTree
 
         return new ConditionalDirectiveTree(rootNode);
     }
-
 
     static List<List<string>> BuildSymbolCombinations(Node rootNode)
     {
@@ -260,7 +247,6 @@ public class ConditionalDirectiveTree
         }
     }
 
-
     sealed class UnorderedListStringComparer : IEqualityComparer<List<string>>
     {
         public static readonly UnorderedListStringComparer Default = new();
@@ -301,36 +287,5 @@ public class ConditionalDirectiveTree
 
             return true;
         }
-    }
-
-
-    // this method doesn't build directive hierarchy. just for reference.
-    internal static IEnumerable<string> GetReferencedPreprocessorSymbols(SyntaxTree syntaxTree)
-    {
-        // https://gist.github.com/terrajobst/5d7d48da5af0a4be891d381fd7b2e5ed
-        var symbols = new HashSet<string>();
-        foreach (var trivia in syntaxTree.GetRoot().DescendantTrivia())
-        {
-            if (!trivia.IsKind(SyntaxKind.IfDirectiveTrivia) &&
-                !trivia.IsKind(SyntaxKind.ElifDirectiveTrivia))
-            {
-                continue;
-            }
-
-            if (trivia.GetStructure() is not ConditionalDirectiveTriviaSyntax directive)
-                continue;
-
-            foreach (var syntax in directive.Condition.DescendantNodesAndSelf())
-            {
-                if (syntax is IdentifierNameSyntax identifier)
-                {
-                    symbols.Add(identifier.Identifier.ValueText);
-                }
-            }
-        }
-
-        var result = new List<string>(symbols);
-        result.Sort();
-        return result;
     }
 }
