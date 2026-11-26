@@ -8,7 +8,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
     public class GitHubUrlBuilderTests
     {
         [Test]
-        public static void GitHubUrlBuilderTest()
+        public void GitHubUrlBuilderTest()
         {
             foreach (var url in new string[]
             {

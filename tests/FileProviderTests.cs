@@ -21,14 +21,14 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         }
 
         [Test]
-        public static void FileProviderRegistrationTest()
+        public void FileProviderRegistrationTest()
         {
             AppCore.RegisterFileProvider("dummy", new DummyProvider());
             Console.WriteImportantLine("\nFileProviderRegistrationTest was done\n");
         }
 
         [Test]
-        public static void FileProviderTest()
+        public void FileProviderTest()
         {
             // Create a dummy file for testing
             const string testFilePath = "test.txt";

@@ -10,7 +10,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
     public class TypeMigratorTests
     {
         [Test]
-        public static void TypeMigratorTest()
+        public void TypeMigratorTest()
         {
             var sourceCode = """
                 namespace Foo.Bar.Baz
@@ -36,7 +36,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         }
 
         [Test]
-        public static void RewriterTest()
+        public void RewriterTest()
         {
             var nestedNamespaces = """
                 namespace Root.Name.Space

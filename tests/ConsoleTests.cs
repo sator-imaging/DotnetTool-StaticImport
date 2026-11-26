@@ -6,7 +6,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
     public class ConsoleTests
     {
         [Test]
-        public static void ReadKeyTest()
+        public void ReadKeyTest()
         {
             if (!Console.CanReadKey)
             {

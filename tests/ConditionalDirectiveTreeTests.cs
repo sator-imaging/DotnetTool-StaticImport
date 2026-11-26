@@ -10,7 +10,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
     public class ConditionalDirectiveTreeTests
     {
         [Test]
-        public static void SymbolCombinationTest()
+        public void SymbolCombinationTest()
         {
             static void expectError(string code)
             {
@@ -97,7 +97,7 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
         }
 
         [Test]
-        public static void ParseComplexDirectiveTreeTest()
+        public void ParseComplexDirectiveTreeTest()
         {
             impl();
 
