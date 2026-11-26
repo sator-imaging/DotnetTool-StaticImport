@@ -22,12 +22,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="NuGetSettings">
-    <PackAsTool>true</PackAsTool>
     <ToolCommandName>static-import</ToolCommandName>
-    <!--
-    <PackageOutputPath>./nupkg</PackageOutputPath>
-    -->
-
     <NuGetPackageID>SatorImaging.DotnetTool.StaticImport</NuGetPackageID>
     <NuGetPackageID Condition=" '$(PackAsCommandName)' == 'true' ">$(ToolCommandName)</NuGetPackageID>
 
