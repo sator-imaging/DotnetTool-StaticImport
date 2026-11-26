@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
-    internal class ConditionalDirectiveTreeTests
+    public class ConditionalDirectiveTreeTests
     {
         [Test]
         public static void SymbolCombinationTest()

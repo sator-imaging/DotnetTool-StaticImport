@@ -5,7 +5,7 @@ using System;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
-    internal class GitHubUrlBuilderTests
+    public class GitHubUrlBuilderTests
     {
         [Test]
         public static void GitHubUrlBuilderTest()

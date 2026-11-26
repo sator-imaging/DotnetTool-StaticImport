@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
-    internal class FileProviderTests
+    public class FileProviderTests
     {
         // A dummy provider for a custom scheme
         private class DummyProvider : IFileProvider

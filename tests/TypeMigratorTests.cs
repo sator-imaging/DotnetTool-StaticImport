@@ -7,7 +7,7 @@ using System.Text;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
-    internal class TypeMigratorTests
+    public class TypeMigratorTests
     {
         [Test]
         public static void TypeMigratorTest()

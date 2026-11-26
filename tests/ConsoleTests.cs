@@ -3,7 +3,7 @@
 
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
-    internal class ConsoleTests
+    public class ConsoleTests
     {
         [Test]
         public static void ReadKeyTest()
