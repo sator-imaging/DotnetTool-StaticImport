@@ -40,27 +40,16 @@ jobs:
     strategy:
       matrix:
         dotnet-version: [ '11.x.x' ]
+        pack-as-tool: [ 'true', '' ]
 
     steps:
     - uses: actions/checkout@v4
-
-    - name: Setup .NET ${{ matrix.dotnet-version }}
-      uses: actions/setup-dotnet@v4
+    - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
-        ##cache: true
     
-    - name: Restore dependencies
-      run: |
-        #cd src
-        dotnet restore
-    
-    - name: Pack
-      run: |
-        dotnet pack -c Release --no-restore
-
-        # short name for dnx
-        dotnet pack -c Release --no-restore  -p:PackAsCommandName=true
+    - run: dotnet restore
+    - run: dotnet pack -c Release --no-restore  -p:PackAsCommandName=${{ matrix.pack-as-tool }}
 
     ################################
     #  NUGET
