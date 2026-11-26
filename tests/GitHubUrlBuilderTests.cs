@@ -5,9 +5,10 @@ using System;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
-    internal class GitHubUrlBuilderTests
+    public class GitHubUrlBuilderTests
     {
-        internal static void GitHubUrlBuilderTest()
+        [Test]
+        public void GitHubUrlBuilderTest()
         {
             foreach (var url in new string[]
             {

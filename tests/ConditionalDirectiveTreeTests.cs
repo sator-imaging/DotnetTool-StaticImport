@@ -7,9 +7,10 @@ using System.Linq;
 
 namespace SatorImaging.DotnetTool.StaticImport.Core
 {
-    internal class ConditionalDirectiveTreeTests
+    public class ConditionalDirectiveTreeTests
     {
-        internal static void SymbolCombinationTest()
+        [Test]
+        public void SymbolCombinationTest()
         {
             static void expectError(string code)
             {
@@ -95,7 +96,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             }
         }
 
-        internal static void ParseComplexDirectiveTreeTest()
+        [Test]
+        public void ParseComplexDirectiveTreeTest()
         {
             impl();
 

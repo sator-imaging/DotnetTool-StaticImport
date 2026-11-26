@@ -12,15 +12,17 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        dotnet-version: [11, 10, 8]
+
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: ${{ matrix.dotnet-version }}.x.x
 
-      - name: Test
-        run: dotnet run --project tests
+      - run: dotnet run --project tests -c Debug   -f net${{ matrix.dotnet-version }}.0
+      - run: dotnet run --project tests -c Release -f net${{ matrix.dotnet-version }}.0
