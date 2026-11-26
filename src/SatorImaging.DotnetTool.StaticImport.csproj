@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>false</ImplicitUsings>
 
-    <OutputType>Exe</OutputType>
+    <OutputType Condition=" '$(PackAsCommandName)' == 'true' ">Exe</OutputType>
 
     <RootNamespace>$(MSBuildProjectName)</RootNamespace>
     <LangVersion>latest</LangVersion>
