@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.3](https://github.com/sator-imaging/DotnetTool-StaticImport/releases/tag/v2.0.3) (2026-11-26)
+
+### 📣 Breaking Changes ⚠
+* fix!: take 3 by [@sator-imaging](https://github.com/sator-imaging) in [#32](https://github.com/sator-imaging/DotnetTool-StaticImport/pull/32)
+
+
+**Full Changelog**: https://github.com/sator-imaging/DotnetTool-StaticImport/compare/v2.0.2...v2.0.3
+
+
 ## [2.0.2](https://github.com/sator-imaging/DotnetTool-StaticImport/releases/tag/v2.0.2) (2026-11-26)
 
 ### 📚 Other Changes
