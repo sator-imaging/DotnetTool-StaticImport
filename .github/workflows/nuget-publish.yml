@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 env:
-  push_source: 'SatorImaging.DotnetTool.StaticImport/bin/Release/*.nupkg'
+  push_source: '**/bin/Release/*.nupkg'
 
 jobs:
   test:
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: [ '10.0.x' ]
+        dotnet-version: [ '11.x.x' ]
 
     steps:
     - uses: actions/checkout@v4
