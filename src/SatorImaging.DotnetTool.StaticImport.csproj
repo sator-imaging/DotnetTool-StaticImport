@@ -1,11 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
-    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
-    <ImplicitUsings>false</ImplicitUsings>
+    <TargetFrameworks>net11.0;net10.0;net9.0;net8.0</TargetFrameworks>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>false</ImplicitUsings>
+
+    <OutputType>Exe</OutputType>
+
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
     <LangVersion>latest</LangVersion>
 
     <Title>$(NuGetPackageTitle)</Title>
