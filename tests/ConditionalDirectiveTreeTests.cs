@@ -9,7 +9,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
 {
     internal class ConditionalDirectiveTreeTests
     {
-        internal static void SymbolCombinationTest()
+        [Test]
+        public static void SymbolCombinationTest()
         {
             static void expectError(string code)
             {
@@ -95,7 +96,8 @@ namespace SatorImaging.DotnetTool.StaticImport.Core
             }
         }
 
-        internal static void ParseComplexDirectiveTreeTest()
+        [Test]
+        public static void ParseComplexDirectiveTreeTest()
         {
             impl();
 
